@@ -1,0 +1,3 @@
+#! /usr/bin/env bash
+
+export from_helper="I'm the current helper"

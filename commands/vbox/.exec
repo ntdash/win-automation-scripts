@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+echo $form_profile
+echo $from_helper
+
+echo "sub command path: $sub_cmd_path"
+
+echo $@
