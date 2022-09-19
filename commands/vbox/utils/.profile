@@ -1,3 +1,5 @@
 #! /usr/bin/env bash
 
-export form_profile="I'm the current profile"
+# env variables
+export vboxmanage_exec_path='/c/program files/oracle/virtualbox/vboxmanage.exe'
+

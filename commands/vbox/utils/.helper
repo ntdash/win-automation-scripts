@@ -1,3 +1,8 @@
 #! /usr/bin/env bash
 
-export from_helper="I'm the current helper"
+vboxmanage ()
+{
+	"$vboxmanage_exec_path" $*
+}
+
+export -f vboxmanage
