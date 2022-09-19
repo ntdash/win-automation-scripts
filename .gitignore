@@ -1,0 +1,10 @@
+# Directories ####
+**/config/**
+**/note/**
+**/logs/**
+**/tmp/**
+
+# Files ##########
+*.note
+*.tmp
+*.log
