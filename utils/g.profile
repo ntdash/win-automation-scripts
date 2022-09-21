@@ -18,12 +18,9 @@ do
 	if [[ -d $path_dot_d ]]
 	then
 
-		for _file in $(ls -A $path_dot_d)
+		for _filename in $(find $path_dot_d -type f)
 		do
-			_resolve_path="${path_dot_d}/${_file}";
-
-			[[ -f $_resolve_path ]] && source $_resolve_path
-
+			source $_filename
 		done
 	fi
 

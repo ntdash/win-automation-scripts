@@ -22,7 +22,7 @@ do
 	[[ ! -f $g_filename ]] && echo "$g_filename is missing" && exit
 
 	# source file if exists
-	. $g_filename
+	source $g_filename
 
 done
 
