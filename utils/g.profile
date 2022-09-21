@@ -12,7 +12,7 @@ potential_pathnames=( "helper" "profile" )
 for _name in ${potential_pathnames[@]}
 do
 	dot_path="${cmd_pathname}/utils/.${_name}"
-	path_dot_d="${cmd_pathname}/utils/${_name}.d"
+	path_dot_d="${cmd_pathname}/utils/${_name}s.d"
 
 	# source list of files if _name is directory
 	if [[ -d $path_dot_d ]]
