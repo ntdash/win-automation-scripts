@@ -1,0 +1,10 @@
+#! /usr/bin/env bash
+
+echo "done - vbox";
+
+vboxmanage ()
+{
+	"$vboxmanage_exec_path" $*
+}
+
+export -f vboxmanage

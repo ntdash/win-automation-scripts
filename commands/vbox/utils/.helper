@@ -1,8 +1,1 @@
 #! /usr/bin/env bash
-
-vboxmanage ()
-{
-	"$vboxmanage_exec_path" $*
-}
-
-export -f vboxmanage
