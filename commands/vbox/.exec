@@ -1,3 +1,38 @@
 #! /usr/bin/env bash
 
-vboxmanage "$*"
+# empty variable before use
+subcommand=
+vname=
+options=
+sub_cmd=
+vname_pholder=
+
+# assignment
+
+subcommand=$1
+
+# get name which is supporse to be the last arguments
+
+vname_pholder=1
+
+vname=${@: -1}
+
+[[ -z $vname ]] || [[ "$vname" =~ ^-+ ]] && vname_pholder=0 && vname=
+
+# get options which is suppose to be located in between subcommand and name
+
+[[ -n $2 ]] && options=${@:2: $((${#} - 1 - $vname_pholder ))}
+
+# check if subcommand exists
+
+sub_cmd="${sub_cmd_pathname}/${subcommand}"
+
+# throw error if not
+[[ ! -f $sub_cmd ]] && echo "Subcommand \"${subcommand}\" not found" && exit 1
+
+# export vname
+[[ -n $vname ]] && export vname
+
+# execute subcommand with options provided
+bash $sub_cmd ${options[@]}
+
