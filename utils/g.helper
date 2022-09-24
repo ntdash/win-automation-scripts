@@ -129,3 +129,4 @@ options_parser()
 
 
 export -f option_getter
+export -f strip_subcommand
