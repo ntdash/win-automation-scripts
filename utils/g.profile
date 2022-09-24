@@ -4,6 +4,8 @@
 
 export cmd_pathname="${scripts_path}/commands/${cmd_name}"
 export sub_cmd_pathname="${cmd_pathname}/subs"
+export parsed_options_keys=()
+export parsed_options_values=()
 
 potential_pathnames=( "helper" "profile" )
 

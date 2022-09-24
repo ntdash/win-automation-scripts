@@ -1,1 +1,131 @@
 #! /usr/bin/env bash
+
+# extract sub command for stdin
+# @params string[]
+# @rvalue [$cmd, ?$options]
+# @throw error_code 1
+strip_subcommand()
+{
+	rvalue=
+
+	# subcommand
+	local cmd=
+	local options=
+
+	# assign
+	[[ -n $1 ]] && cmd=$1 || return 1
+
+	[[ -n $2 ]] && options=${@:2}
+
+	rvalue=("${cmd}" "${options}")
+}
+
+
+# if $2=true, assign bound value to rvalue and return appropriate error_code
+# @param[1] :option_name = string
+# @param[2] :retrive_value = boolean
+# @return int
+	#> ?0 found
+	#> ?1 not found
+	#> ?2 value not found
+
+# bad code
+option_getter()
+{
+	local patttern="([[:digit:]]):${1}"
+	local key=
+	local value=
+
+	if [[ " ${parsed_options_keys[@]} " =~ $patttern ]]
+	then
+
+		key=${BASH_REMATCH[1]}
+
+		if [[ -n $2 ]] && [[ "${2}" == "true" ]]
+		then
+
+			value=${parsed_options_values[$key]}
+
+			[[ -z $value ]] && return 2 || echo $value
+		fi
+
+		return 0
+
+	else
+		return 1
+	fi
+}
+
+
+
+options_parser()
+{
+	local i=-1
+
+	# check options format
+	[[ ! "${1}" =~ ^-(-?)(.+) ]] && echo "Error: list of options should start with \"-\" or \"--\"" && return 1;
+
+	for entry in $@
+	do
+
+		if [[ "${entry}" =~ ^-(-?)(.+) ]]
+		then
+			# increment offset when assigning a new key
+			i=$(( $i + 1 ))
+
+
+			#check if shorthand
+			if [[ -z ${BASH_REMATCH[1]} ]]
+			then
+
+				local matches=($(echo ${BASH_REMATCH[2]} | grep -o .))
+
+				if [[ ${#matches[@]} -gt 1 ]]
+				then
+					# decrement for multiple appends
+					i=$(( $i - 1 ))
+
+					for k in ${matches[@]}
+					do
+						# increament before assignment
+						i=$(( $i + 1 ))
+
+						# assign key
+						parsed_options_keys[$i]="$i:${k}"
+
+						# default value
+						parsed_options_values[$i]=
+
+					done
+
+				else
+
+					# assign keys
+					parsed_options_keys[$i]="${i}:${matches[0]}"
+
+					# default value
+					parsed_options_values[$i]=
+				fi
+
+
+				# skip early without assigning default value
+				continue
+			else
+				parsed_options_keys[$i]="${i}:${BASH_REMATCH[2]}"
+			fi
+
+			# assign default value to key
+			# echo "value[${i}]=null"
+			parsed_options_values[$i]=
+
+			# skip
+			continue;
+		fi
+
+		# if next entry is not a key override the current index of values by current entry
+		parsed_options_values[$i]="${entry}"
+	done
+}
+
+
+export -f option_getter
