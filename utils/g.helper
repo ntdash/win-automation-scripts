@@ -123,7 +123,7 @@ options_parser()
 		fi
 
 		# if next entry is not a key override the current index of values by current entry
-		parsed_options_values[$i]="${entry}"
+		parsed_options_values[$i]+="${entry}"
 	done
 }
 
