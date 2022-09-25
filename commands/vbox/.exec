@@ -30,6 +30,6 @@ cmd_exec="${cmd_path}/.exec"
 # export cmd_path
 export cwd=$cmd_path
 
-# execute subcommand with options provided
+# execute subcommand
 . $cmd_exec
 
