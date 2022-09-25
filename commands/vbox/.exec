@@ -1,38 +1,35 @@
 #! /usr/bin/env bash
 
 # empty variable before use
-subcommand=
-vname=
+cmd_name=
+cmd_exec=
 options=
-sub_cmd=
-vname_pholder=
 
-# assignment
 
-subcommand=$1
+# strip subcommand
+strip_subcommand $@
 
-# get name which is supporse to be the last arguments
+# temporary error message
+# but can show help page instead [next-update]
+[[ $? -ne 0 ]] && echo "Unable to retrieve Subcommand" && exit 1
 
-vname_pholder=1
+# attribute stripped values
+cmd_name=${rvalue[0]}
+options=${rvalue[1]}
 
-vname=${@: -1}
+# form subcommand exec pathname
+cmd_path="${sub_cmd_pathname}/${cmd_name}"
+cmd_exec="${cmd_path}/.exec"
 
-[[ -z $vname ]] || [[ "$vname" =~ ^-+ ]] && vname_pholder=0 && vname=
+# throw error if not exec file not found
+[[ ! -f $cmd_exec ]] && echo "Subcommand \"${cmd_name}\" not found" && exit 1
 
-# get options which is suppose to be located in between subcommand and name
+# check if options is provided and parse it
+[[ -n $options ]] && options_parser $options
 
-[[ -n $2 ]] && options=${@:2: $((${#} - 1 - $vname_pholder ))}
-
-# check if subcommand exists
-
-sub_cmd="${sub_cmd_pathname}/${subcommand}"
-
-# throw error if not
-[[ ! -f $sub_cmd ]] && echo "Subcommand \"${subcommand}\" not found" && exit 1
-
-# export vname
-[[ -n $vname ]] && export vname
+# export cmd_path
+export cwd=$cmd_path
 
 # execute subcommand with options provided
-bash $sub_cmd ${options[@]}
+. $cmd_exec
 
