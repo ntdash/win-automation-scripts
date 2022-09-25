@@ -6,24 +6,26 @@
 # @throw error_code 1
 strip_subcommand()
 {
+	# global returner
 	rvalue=
 
-	# subcommand
+	# local assignment
 	local cmd=
 	local options=
 
-	# assign
+	# conds
 	[[ -n $1 ]] && cmd=$1 || return 1
 
 	[[ -n $2 ]] && options=${@:2}
 
+	# return
 	rvalue=("${cmd}" "${options}")
 }
 
 
 # if $2=true, assign bound value to rvalue and return appropriate error_code
 # @param[1] :option_name = string
-# @param[2] :retrive_value = boolean
+# @param[2] :expect_value = boolean
 # @return int
 	#> ?0 found
 	#> ?1 not found
@@ -32,22 +34,22 @@ strip_subcommand()
 # bad code
 option_getter()
 {
+
+	# global returner
+	rvalue=
+
+	# local assignment
 	local patttern="([[:digit:]]):${1}"
 	local key=
-	local value=
 
 	if [[ " ${parsed_options_keys[@]} " =~ $patttern ]]
 	then
 
 		key=${BASH_REMATCH[1]}
+		rvalue=${parsed_options_values[$key]}
 
-		if [[ -n $2 ]] && [[ "${2}" == "true" ]]
-		then
-
-			value=${parsed_options_values[$key]}
-
-			[[ -z $value ]] && return 2 || echo $value
-		fi
+		# return code 2 if value is expected but not found
+		[[ "${2}" == "true" ]] && [[ -z $rvalue]] && return 2
 
 		return 0
 
