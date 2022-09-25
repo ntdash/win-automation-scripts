@@ -49,7 +49,7 @@ option_getter()
 		rvalue=${parsed_options_values[$key]}
 
 		# return code 2 if value is expected but not found
-		[[ "${2}" == "true" ]] && [[ -z $rvalue]] && return 2
+		[[ "${2}" == "true" ]] && [[ -z $rvalue ]] && return 2
 
 		return 0
 
@@ -125,7 +125,7 @@ options_parser()
 		fi
 
 		# if next entry is not a key override the current index of values by current entry
-		parsed_options_values[$i]+="${entry}"
+		parsed_options_values[$i]+=" ${entry} "
 	done
 }
 
