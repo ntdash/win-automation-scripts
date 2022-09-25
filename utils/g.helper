@@ -127,6 +127,6 @@ options_parser()
 	done
 }
 
-
-export -f option_getter
 export -f strip_subcommand
+export -f options_parser
+export -f option_getter
