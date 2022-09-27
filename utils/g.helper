@@ -22,113 +22,151 @@ strip_subcommand()
 	rvalue=("${cmd}" "${options}")
 }
 
+# check if value is defined
+is_defined()
+{
+	declare -p $1 |& /dev/null
 
-# if $2=true, assign bound value to rvalue and return appropriate error_code
+	return $?
+}
+
+
+# check if value is array
+is_array()
+{
+	declare patttern="^declare -[aA]"
+
+	[[ "$(declare -p ${1} 2>/dev/null)" =~ $patttern ]]
+
+	return $?
+}
+
+# check if variable is associative array
+is_assoc_array()
+{
+	declare patttern="^declare -A"
+
+	[[ "$(declare -p ${1} 2>/dev/null)" =~ $patttern ]]
+
+	return $?
+}
+
+# if $2!=undefined, assign bound value to rvalue and return appropriate error_code
 # @param[1] :option_name = string
-# @param[2] :expect_value = boolean
+# @param[2] :expect_value = true|input|undefined
 # @return int
 	#> ?0 found
 	#> ?1 not found
 	#> ?2 value not found
-
-# bad code
-option_getter()
+get_option()
 {
-
 	# global returner
-	rvalue=
+	declare -g rvalue
 
-	# local assignment
-	local patttern="([[:digit:]]):${1}"
-	local key=
 
-	if [[ " ${parsed_options_keys[@]} " =~ $patttern ]]
+	# load parsed_options
+	source $parsed_options
+
+	# throw error if collection not defined
+	[[ $( is_assoc_array collection ) -ne 0 ]] && echo "Parsed options not found" && return 1
+
+	# check if key exist
+	if [[ " ${!collection[@]} " =~ $1 ]]
 	then
 
-		key=${BASH_REMATCH[1]}
-		rvalue=${parsed_options_values[$key]}
+		rvalue=${collection[$1]}
 
-		# return code 2 if value is expected but not found
-		[[ "${2}" == "true" ]] && [[ -z $rvalue ]] && return 2
+		if [[ "${2}" =~ (true|input) ]]
+		then
+
+			# return error_code=2 if value is expected but not found
+			[[ -z $rvalue ]] && return 2
+
+			[[ "${2}" == "input" ]] && echo $rvalue
+
+		fi
 
 		return 0
-
-	else
-		return 1
 	fi
-}
 
+	return 1
+}
 
 
 options_parser()
 {
-	local i=-1
+	declare -A collection
+	# current key
+	declare ckey
 
 	# check options format
-	[[ ! "${1}" =~ ^-(-?)(.+) ]] && echo "Error: list of options should start with \"-\" or \"--\"" && return 1;
+	[[ ! "${1}" =~ ^-(-?)(.+) ]] && echo "Given options \"${@}\" does not satisfy the expected format" && return 1;
 
-	for entry in $@
+	for _entry in $@
 	do
 
-		if [[ "${entry}" =~ ^-(-?)(.+) ]]
+		# check if current _entry is a key
+		if [[ "${_entry}" =~ ^-(-?)(.+) ]]
 		then
-			# increment offset when assigning a new key
-			i=$(( $i + 1 ))
 
-
-			#check if shorthand
+			# check if current key is a shorthand
 			if [[ -z ${BASH_REMATCH[1]} ]]
 			then
 
-				local matches=($(echo ${BASH_REMATCH[2]} | grep -o .))
+				declare list=`echo ${BASH_REMATCH[2]} | grep -o .`
 
-				if [[ ${#matches[@]} -gt 1 ]]
+				if [[ ${#list[@]} -gt 1 ]]
 				then
-					# decrement for multiple appends
-					i=$(( $i - 1 ))
+					# loop current value
+					declare k
 
-					for k in ${matches[@]}
+					for k in ${list[@]}
 					do
-						# increament before assignment
-						i=$(( $i + 1 ))
-
-						# assign key
-						parsed_options_keys[$i]="$i:${k}"
-
-						# default value
-						parsed_options_values[$i]=
-
+						# init
+						collection[$k]=
 					done
 
+					# keep last value
+					ckey="${k}"
+
+					# skip
+					continue;
+
 				else
-
-					# assign keys
-					parsed_options_keys[$i]="${i}:${matches[0]}"
-
-					# default value
-					parsed_options_values[$i]=
+					# sole shorthand
+					ckey="${list[0]}"
 				fi
 
-
-				# skip early without assigning default value
-				continue
 			else
-				parsed_options_keys[$i]="${i}:${BASH_REMATCH[2]}"
+				# long hand
+				ckey="${BASH_REMATCH[2]}"
 			fi
 
-			# assign default value to key
-			# echo "value[${i}]=null"
-			parsed_options_values[$i]=
+			# init
+			collection[$ckey]=
 
 			# skip
 			continue;
+
 		fi
 
-		# if next entry is not a key override the current index of values by current entry
-		parsed_options_values[$i]+=" ${entry} "
+		# add value to last registered key
+		collection[$ckey]+=" ${_entry} "
+
 	done
+
+	[[ $? -ne 0 ]] && echo "Failed to parse given options: \"${@}\"" && return 1
+
+	# dump collection into tmp file
+	declare -p collection > $parsed_options
 }
 
-export -f strip_subcommand
-export -f options_parser
-export -f option_getter
+declare -xf strip_subcommand
+declare -xf options_parser
+declare -xf get_option
+
+
+# utils
+declare -xf is_defined
+declare -xf is_array
+declare -xf is_assoc_array
