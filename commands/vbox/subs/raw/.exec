@@ -1,11 +1,8 @@
 #! /usr/bin/env bash
 
-option_getter 'q'
-
+declare query=(`get_option q input`)
 
 [[ $? -ne 0 ]] && echo "Raw query missing or not provided." && exit 1
 
-# safe conversion
-query=($rvalue)
 
 vboxmanage "${query[@]}"
