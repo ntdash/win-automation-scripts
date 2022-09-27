@@ -11,7 +11,7 @@ argv=${@:2}
 
 
 # source files global files
-g_partials=( "helper" "profile" )
+g_partials=( "helper" "profile" "cleanup" )
 partials_bname=$(dirname $0)
 
 for g_file in ${g_partials[@]}
