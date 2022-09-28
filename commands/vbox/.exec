@@ -1,9 +1,7 @@
 #! /usr/bin/env bash
 
 # empty variable before use
-cmd_name=
-cmd_exec=
-options=
+declare cmd_name= cmd_exec= options=
 
 
 # strip subcommand
@@ -11,7 +9,7 @@ strip_subcommand $@
 
 # temporary error message
 # but can show help page instead [next-update]
-[[ $? -ne 0 ]] && echo "Unable to retrieve Subcommand" && exit 1
+[[ $? -ne 0 ]] && echo "Failed to retrieve Subcommand" && exit 1
 
 # attribute stripped values
 cmd_name=${rvalue[0]}
@@ -28,7 +26,7 @@ cmd_exec="${cmd_path}/.exec"
 [[ -n $options ]] && options_parser $options
 
 # export cmd_path
-export cwd=$cmd_path
+declare -x cwd=$cmd_path
 
 # execute subcommand
 . $cmd_exec
