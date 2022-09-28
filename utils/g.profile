@@ -4,25 +4,33 @@
 
 declare -x cmd_pathname="${scripts_path}/commands/${cmd_name}"
 declare -x sub_cmd_pathname="${cmd_pathname}/subs"
+
+# parsed_options buffer
 declare -x parsed_options="$(mktemp -t c_opt.${cmd_name}.XXXXX)"
 
+# remove when exiting
+trap "rm ${parsed_options}" EXIT
 
-_partials=( "helper" "profile" )
 
-# source files
+declare _partials=( "helper" "profile" )
 
-for _name in ${_partials[@]}
+# loop variables
+declare _entry= dot_path= path_dot_d=
+
+for _entry in ${_partials[@]}
 do
-	dot_path="${cmd_pathname}/utils/.${_name}"
-	path_dot_d="${cmd_pathname}/utils/${_name}s.d"
+	dot_path="${cmd_pathname}/utils/.${_entry}"
+	path_dot_d="${cmd_pathname}/utils/${_entry}s.d"
 
-	# source list of files if _name is directory
+	# source list of files if _entry is directory
 	if [[ -d $path_dot_d ]]
 	then
+		# loop variables
+		declare _pathname=
 
-		for _filename in $(find $path_dot_d -type f)
+		for _pathname in $(find $path_dot_d -type f)
 		do
-			source $_filename
+			source $_pathname
 		done
 	fi
 

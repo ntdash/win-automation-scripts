@@ -5,4 +5,4 @@ vboxmanage ()
 	"$vboxmanage_exec_path" $*
 }
 
-export -f vboxmanage
+declare -xf vboxmanage

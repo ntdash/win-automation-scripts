@@ -7,11 +7,10 @@
 strip_subcommand()
 {
 	# global returner
-	rvalue=
+	declare -g rvalue=
 
-	# local assignment
-	local cmd=
-	local options=
+	# declare assignment
+	declare cmd options
 
 	# conds
 	[[ -n $1 ]] && cmd=$1 || return 1
@@ -61,7 +60,7 @@ is_assoc_array()
 get_option()
 {
 	# global returner
-	declare -g rvalue
+	declare -g rvalue=
 
 
 	# load parsed_options
@@ -164,9 +163,7 @@ options_parser()
 declare -xf strip_subcommand
 declare -xf options_parser
 declare -xf get_option
-
-
-# utils
 declare -xf is_defined
 declare -xf is_array
 declare -xf is_assoc_array
+
