@@ -1,19 +1,11 @@
 #! /usr/bin/env bash
 
-# empty variable before use
 declare cmd_name= cmd_exec= options=
 
-
-# strip subcommand
-strip_subcommand $@
-
-# temporary error message
-# but can show help page instead [next-update]
-[[ $? -ne 0 ]] && echo "Failed to retrieve Subcommand" && exit 1
-
 # attribute stripped values
-cmd_name=${rvalue[0]}
-options=${rvalue[1]}
+cmd_name=$1
+options="${@:2}"
+
 
 # form subcommand exec pathname
 cmd_path="${sub_cmd_pathname}/${cmd_name}"
@@ -23,11 +15,11 @@ cmd_exec="${cmd_path}/.exec"
 [[ ! -f $cmd_exec ]] && echo "Subcommand \"${cmd_name}\" not found" && exit 1
 
 # check if options is provided and parse it
-[[ -n $options ]] && options_parser $options
+[[ -n $options ]] && options_parser ${options[@]}
 
 # export cmd_path
 declare -x cwd=$cmd_path
 
 # execute subcommand
-. $cmd_exec
+bash $cmd_exec
 

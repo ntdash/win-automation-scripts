@@ -1,8 +1,7 @@
 #! /usr/bin/env bash
 
-declare query=(`get_option q input`)
+option_value q :query
 
-[[ $? -ne 0 ]] && echo "Raw query missing or not provided." && exit 1
-
+[[ -z $query ]] && echo "Failed to execute query provided" && exit 1
 
 vboxmanage "${query[@]}"
