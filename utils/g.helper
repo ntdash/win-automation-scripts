@@ -1,26 +1,5 @@
 #! /usr/bin/env bash
 
-# extract sub command for stdin
-# @params string[]
-# @rvalue [$cmd, ?$options]
-# @throw error_code 1
-strip_subcommand()
-{
-	# global returner
-	declare -g rvalue=
-
-	# declare assignment
-	declare cmd options
-
-	# conds
-	[[ -n $1 ]] && cmd=$1 || return 1
-
-	[[ -n $2 ]] && options=${@:2}
-
-	# return
-	rvalue=("${cmd}" "${options}")
-}
-
 # check if value is defined
 is_defined()
 {
@@ -28,7 +7,6 @@ is_defined()
 
 	return $?
 }
-
 
 # check if value is array
 is_array()
@@ -57,55 +35,118 @@ is_assoc_array()
 	#> ?0 found
 	#> ?1 not found
 	#> ?2 value not found
-get_option()
+
+options_manager()
 {
-	# global returner
-	declare -g rvalue=
-
-
 	# load parsed_options
 	source $parsed_options
 
 	# throw error if collection not defined
-	[[ $( is_assoc_array collection ) -ne 0 ]] && echo "Parsed options not found" && return 1
+	[[ $( is_assoc_array collection ) -ne 0 ]] && echo "Failed to retrieve parsed option's collection." && return 1
 
-	# check if key exist
-	if [[ " ${!collection[@]} " =~ $1 ]]
-	then
+	# declare local returners
+	declare -i rcode=0
+	declare rvalue=
 
-		rvalue=${collection[$1]}
+	case $1 in
 
-		if [[ "${2}" =~ (true|input) ]]
-		then
+		"get")
+			case $2 in
 
-			# return error_code=2 if value is expected but not found
-			[[ -z $rvalue ]] && return 2
+				"keys")
+					rvalue=${!collection[@]}
+				;;
 
-			[[ "${2}" == "input" ]] && echo $rvalue
+				# error_message="Failed to retrieve value of option:\"${3}\"."
+				"value")
+					rvalue=${collection[$3]}
 
-		fi
+					[[ -z $rvalue ]] && rcode=2
+				;;
 
-		return 0
-	fi
+				# error_message="Failed to retrieve \"${2}\"."
+				*)
+					rcode=1
+				;;
+			esac
+		;;
 
-	return 1
+		"check")
+
+			[[ " ${!collection[@]} " =~ $3 ]] && rcode=0 || rcode=1
+		;;
+
+		# echo "Failed to proccess \"${1}\""
+		*)
+			rcode=1
+		;;
+	esac
+
+
+	# early return if inline usage of returned value
+	[[ $rcode -eq 0 ]] && echo $rvalue
+
+	return $rcode
 }
 
+
+option_value()
+{
+
+	# prepare bind value with ref if given
+	[[ -n $2 ]] && [[ "$2" =~ ^:.+ ]] && declare xval="${2:1}" && declare -g $xval && declare -n rval=$xval
+
+	# encapsulation
+	declare cval=
+
+	cval=$(options_manager get value $1)
+
+
+	[[ $? -ne 0 ]] && echo "Failed to retrieve value of option \"${1}\"." && return 1
+
+	[[ $(is_defined rval ) -eq 0 ]] && rval=$cval || echo $cval
+
+	return $?
+}
+
+option_key_exists()
+{
+	options_manager check $1 |& /dev/null
+
+	return $?
+}
+
+option_keys()
+{
+	# prepare bind value with ref if given
+	[[ -n $1 ]] && [[ "$1" =~ ^:.+ ]] && declare xval="${1:1}" && declare -ag $xval && declare -n rval=$xval
+
+	declare -a cval=
+
+	cval=$(options_manager get keys)
+
+	[[ $(is_defined rval ) -eq 0 ]] && rval=($cval[@]) || echo $cval
+
+	return $?
+}
 
 options_parser()
 {
 	declare -A collection
-	# current key
-	declare ckey
 
 	# check options format
 	[[ ! "${1}" =~ ^-(-?)(.+) ]] && echo "Given options \"${@}\" does not satisfy the expected format" && return 1;
 
-	for _entry in $@
+	# vars
+	declare ckey= entry=
+
+	while read entry
 	do
 
-		# check if current _entry is a key
-		if [[ "${_entry}" =~ ^-(-?)(.+) ]]
+		[[ -z $entry ]] && continue
+
+		# check if current entry is a key
+		if [[ "${entry}" =~ ^-(-?)(.+) ]]
 		then
 
 			# check if current key is a shorthand
@@ -150,9 +191,10 @@ options_parser()
 		fi
 
 		# add value to last registered key
-		collection[$ckey]+=" ${_entry} "
+		collection[$ckey]+=" ${entry} "
 
-	done
+	done <<< "$(echo $@ | sed 's/\s/\n/g')"
+
 
 	[[ $? -ne 0 ]] && echo "Failed to parse given options: \"${@}\"" && return 1
 
@@ -160,10 +202,13 @@ options_parser()
 	declare -p collection > $parsed_options
 }
 
-declare -xf strip_subcommand
+# option helpers
 declare -xf options_parser
-declare -xf get_option
+declare -xf options_manager
+declare -xf option_value
+declare -xf option_keys
+declare -xf option_key_exists
+# definition helpers
 declare -xf is_defined
 declare -xf is_array
 declare -xf is_assoc_array
-
