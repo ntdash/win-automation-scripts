@@ -1,25 +1,25 @@
 #! /usr/bin/env bash
 
-declare cmd_name= cmd_exec= options=
+declare sub_cmd_name= sub_cmd_exec= options=
 
 # attribute stripped values
-cmd_name=$1
+sub_cmd_name=$1
 options="${@:2}"
 
 
 # form subcommand exec pathname
-cmd_path="${sub_cmd_pathname}/${cmd_name}"
-cmd_exec="${cmd_path}/.exec"
+resolved_path="${sub_cmd_pathname}/${sub_cmd_name}"
+sub_cmd_exec="${resolved_path}/.exec"
 
 # throw error if not exec file not found
-[[ ! -f $cmd_exec ]] && echo "Subcommand \"${cmd_name}\" not found" && exit 1
+[[ ! -f $sub_cmd_exec ]] && echo "Subcommand \"${sub_cmd_name}\" not found" && exit 1
 
 # check if options is provided and parse it
-[[ -n $options ]] && options_parser ${options[@]}
+[[ -n $options ]] && options_parser $options
 
-# export cmd_path
-declare -x cwd=$cmd_path
+# export sub_command_path
+declare -x cwd=$resolved_path
 
 # execute subcommand
-bash $cmd_exec
+bash $sub_cmd_exec
 
