@@ -138,12 +138,16 @@ options_parser()
 	[[ ! "${1}" =~ ^-(-?)(.+) ]] && echo "Given options \"${@}\" does not satisfy the expected format" && return 1;
 
 	# vars
-	declare ckey= entry=
+	declare ckey= entry= collector=
 
 	while read entry
 	do
+		# shift the retrieved params
+		shift;
 
 		[[ -z $entry ]] && continue
+
+		[[ "${entry}" == "--" ]] && [[ -n $ckey ]] && collector=true && break
 
 		# check if current entry is a key
 		if [[ "${entry}" =~ ^-(-?)(.+) ]]
@@ -195,6 +199,7 @@ options_parser()
 
 	done <<< "$(echo $@ | sed 's/\s/\n/g')"
 
+	[[ -n $collector ]] && [[ $# -gt 0 ]] && collection[$ckey]+=" ${@} "
 
 	[[ $? -ne 0 ]] && echo "Failed to parse given options: \"${@}\"" && return 1
 
