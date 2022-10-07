@@ -199,7 +199,7 @@ options_parser()
 
 	done <<< "$(echo $@ | sed 's/\s/\n/g')"
 
-	[[ -n $collector ]] && [[ $# -gt 0 ]] && collection[$ckey]+=" ${@} "
+	[[ "$collector" == "true" ]] && [[ $# -gt 0 ]] && collection[$ckey]+=" ${@} " || collector=
 
 	[[ $? -ne 0 ]] && echo "Failed to parse given options: \"${@}\"" && return 1
 
