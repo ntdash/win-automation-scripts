@@ -91,7 +91,7 @@ options_manager()
 }
 
 
-option_value()
+get_option_value()
 {
 
 	# prepare bind value with ref if given
@@ -121,7 +121,7 @@ option_key_exists()
 	return $?
 }
 
-option_keys()
+get_option_keys()
 {
 	# prepare bind value with ref if given
 	[[ -n $1 ]] && [[ "$1" =~ ^:.+ ]] && declare xval="${1:1}" && declare -ag $xval && declare -n rval=$xval
@@ -213,8 +213,9 @@ options_parser()
 # option helpers
 declare -xf options_parser
 declare -xf options_manager
-declare -xf option_value
-declare -xf option_keys
+
+declare -xf get_option_value
+declare -xf get_option_keys
 declare -xf option_key_exists
 # definition helpers
 declare -xf is_defined
