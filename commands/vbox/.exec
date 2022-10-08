@@ -1,14 +1,43 @@
 #! /usr/bin/env bash
 
+# error
+[[ $# -lt 1 ]] && $(help "Subcommand not specified.") && exit
+
+[[ $# -eq 1 ]] && [[ "$1" != "--" ]] && echo "Missing Virtual Machine Name." && exit
+
 declare sub_cmd_name= sub_cmd_exec= options=
+declare -i opt_id
 
 # resolve [--] short hand
-[[ "$1" == "--" ]] && set -- raw -q -- ${@:2}
+if [[ "$1" == "--" ]]
+then
+	# assign option starting index
+	opt_id=2
 
-# attribute stripped values
+	set -- raw -q -- ${@:2}
+else
+	declare vname
+
+	# assign option starting index
+	opt_id=3
+
+	[[ ! "$2" =~ ^\s*- ]] && vname=$2 || vname=${@: -1} && last=true
+
+	[[ "$vname" =~ ^\s*- ]] && echo "Failed to retrieve Virtual Machine Name" && exit
+
+	declare -xg vname
+
+	if [[ $# -ge 3 ]]
+	then
+		[[ -n $last ]] && set -- $1 ${@:3: $(($# -2))}
+	fi
+fi
+
+# assign subcommand name
 sub_cmd_name=$1
-options="${@:2}"
 
+# assign left arguments to options
+[[ $# -ge $opt_id ]] && options="${@:$opt_id}" || options=
 
 # form subcommand exec pathname
 resolved_path="${sub_cmd_pathname}/${sub_cmd_name}"
