@@ -42,7 +42,7 @@ options_manager()
 	source $parsed_options
 
 	# throw error if collection not defined
-	[[ $( is_assoc_array collection ) ]] && echo "Failed to retrieve parsed option's collection." && return 1
+	$( is_assoc_array collection ) && echo "Failed to retrieve parsed option's collection." && return 1
 
 	# declare local returners
 	declare -i rcode=0
@@ -101,12 +101,9 @@ option_value()
 
 	cval=$(options_manager get value $1)
 
-
 	[[ $? -ne 0 ]] && echo "Failed to retrieve value of option \"${1}\"." && return 1
 
-	[[ $(is_defined rval ) ]] && rval=$cval || echo $cval
-
-	return $?
+ 	$( is_defined rval ) && rval=$cval || echo $cval
 }
 
 option_key_exists()
@@ -125,9 +122,7 @@ option_keys()
 
 	cval=$(options_manager get keys)
 
-	[[ $(is_defined rval ) ]] && rval=(${cval[@]}) || echo $cval
-
-	return $?
+	$(is_defined rval) && rval=(${cval[@]}) || echo $cval
 }
 
 options_parser()
