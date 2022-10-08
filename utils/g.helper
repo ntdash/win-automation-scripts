@@ -3,7 +3,7 @@
 # check if value is defined
 is_defined()
 {
-	declare -p $1 2>&1 /dev/null
+	declare -p $1 &> /dev/null
 
 	return $?
 }
@@ -42,7 +42,8 @@ options_manager()
 	source $parsed_options
 
 	# throw error if collection not defined
-	$( is_assoc_array collection ) && echo "Failed to retrieve parsed option's collection." && return 1
+	# echo "Failed to retrieve parsed option's collection."
+	! $(is_assoc_array collection) && return 1
 
 	# declare local returners
 	declare -i rcode=0
@@ -101,9 +102,16 @@ option_value()
 
 	cval=$(options_manager get value $1)
 
-	[[ $? -ne 0 ]] && echo "Failed to retrieve value of option \"${1}\"." && return 1
+	if [[ $? -ne 0 ]]
+	then
 
- 	$( is_defined rval ) && rval=$cval || echo $cval
+		$(is_defined rval) && echo "Failed to retrieve value of option \"${1}\"."
+
+		return 1
+	fi
+
+
+ 	$(is_defined rval) && rval=$cval || echo $cval
 }
 
 option_key_exists()
