@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 # error
-[[ $# -lt 1 ]] && $(help "Subcommand not specified.") && exit
+[[ $# -lt 1 ]] && $(helper "Subcommand not specified.") && exit
 
 [[ $# -eq 1 ]] && [[ "$1" != "--" ]] && echo "Missing Virtual Machine Name." && exit
 
