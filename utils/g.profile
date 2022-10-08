@@ -4,12 +4,13 @@
 
 declare -x cmd_pathname="${scripts_path}/commands/${cmd_name}"
 declare -x sub_cmd_pathname="${cmd_pathname}/subs"
+declare -x tprefix="copts-b"
 
 # parsed_options buffer
-declare -x parsed_options="$(mktemp -t c_opt.${cmd_name}.XXXXX)"
+declare -x parsed_options="$(mktemp -t ${tprefix}.${cmd_name}.XXXXXXX)"
 
 # remove when exiting
-trap "rm ${parsed_options}" EXIT
+trap "rm -f ${parsed_options}" EXIT
 
 
 declare _partials=( "helper" "profile" )
