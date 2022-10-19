@@ -4,4 +4,4 @@ get_option_value q :query
 
 ! $(is_defined query) && echo "Failed to retrieve query provided" && exit 1
 
-vboxmanage "${query[@]}"
+vboxmanage $query

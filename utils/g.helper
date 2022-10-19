@@ -41,7 +41,7 @@ bind_param()
 
 	result=$(declare -p ${v_param} | sed -r "s/^declare -(.+) ${v_param}=(.+)$/\1:\2/" )
 
-	IFS=':'
+	declare IFS=':'
 	read v_type value <<< $result
 	IFS=
 
@@ -160,7 +160,7 @@ options_parser()
 
 	declare argv="$@"
 
-	IFS=
+	declare IFS=
 	while read entry
 	do
 		# shift the retrieved params

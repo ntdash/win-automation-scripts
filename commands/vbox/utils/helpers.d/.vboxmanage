@@ -2,7 +2,8 @@
 
 vboxmanage ()
 {
-	"$vboxmanage_exec_path" $*
+	declare IFS=' '
+	"${vboxmanage_exec_path}" $@
 }
 
 declare -xf vboxmanage
