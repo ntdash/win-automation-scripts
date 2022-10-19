@@ -7,11 +7,15 @@ declare argv=${@:2}
 
 
 # command should be provied other wise quit
-[[ -z $cmd_name ]] && echo "Command not defined" && exit 1;
+if [[ -z $cmd_name ]]
+then
+	echo "Command: ${cmd_name} not found..."
+	exit 1
+fi
 
 
 # source files global files
-declare main_partials=( "helper" "profile" "cleanup" )
+declare -a main_partials=( "helper" "profile" "cleanup" )
 declare partials_bname=$(dirname $0)
 
 for _filename in ${main_partials[@]}
@@ -19,15 +23,24 @@ do
 
 	declare resolved_pathname="${partials_bname}/g.${_filename}"
 
-	[[ ! -f $resolved_pathname ]] && echo "Failed to source script at \"$resolved_pathname\"." && exit 1
+	if [[ ! -f $resolved_pathname ]]
+	then
+		 echo "Failed to open file at: \"$resolved_pathname\""
+		 exit 1
+	fi
 
 	# source file if exists
 	source $resolved_pathname
 
 done
 
-declare exec_pathanme="${scripts_path}/commands/${cmd_name}/.exec"
+declare exec_pathname="${scripts_path}/commands/${cmd_name}/.exec"
 
-[[ ! -f $exec_pathanme ]] && echo "Command \"${cmd_name}\" .exec file missing."
+if [[ ! -f $exec_pathname ]]
+then
+	echo "Failed to execute Sub Command: \$\"${cmd_name}\""
+	exit 1
+fi
 
-bash $exec_pathanme $argv
+# execute command `.exec` file
+bash $exec_pathname $argv

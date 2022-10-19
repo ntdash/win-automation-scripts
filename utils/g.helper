@@ -28,13 +28,23 @@ is_assoc_array()
 	return $?
 }
 
-# if $2!=undefined, assign bound value to rvalue and return appropriate error_code
-# @param[1] :option_name = string
-# @param[2] :expect_value = true|input|undefined
-# @return int
-	#> ?0 found
-	#> ?1 not found
-	#> ?2 value not found
+# $1 = value-param-name:binding-param-name
+bind_param()
+{
+	if [[ $# -ne 2 ]] || [[ ! "$2" =~ ^:.+ ]]
+	then
+		return 1
+	fi
+
+	# value-param && binding-param
+	declare b_param=${2:1} v_param=$1 v_type value
+
+	IFS=':'
+	read v_type value <<< "$( declare -p $v_param | sed -r '"s/^declare -(.+) $v_param=(.+)$/\1:\2/"')"
+	IFS=
+
+	declare -${v_type}g $b_param=$value
+}
 
 options_manager()
 {
@@ -52,6 +62,7 @@ options_manager()
 	case $1 in
 
 		"get")
+			# $2 = key
 			case $2 in
 
 				"keys")
@@ -62,7 +73,7 @@ options_manager()
 				"value")
 					rvalue=${collection[$3]}
 
-					[[ -z $rvalue ]] && rcode=2
+					[[ -z $rvalue ]] && rcode=2 || rcode=0
 				;;
 
 				# error_message="Failed to retrieve \"${2}\"."
@@ -84,8 +95,10 @@ options_manager()
 	esac
 
 
-	# early return if inline usage of returned value
-	[[ $rcode -eq 0 ]] && echo $rvalue
+	if [[ $rcode -eq 0 ]]
+	then
+		echo $rvalue
+	fi
 
 	return $rcode
 }
@@ -93,25 +106,20 @@ options_manager()
 
 get_option_value()
 {
-
-	# prepare bind value with ref if given
-	[[ -n $2 ]] && [[ "$2" =~ ^:.+ ]] && declare xval="${2:1}" && declare -g $xval && declare -n rval=$xval
-
 	# encapsulation
-	declare cval=
+	declare cval
 
 	cval=$(options_manager get value $1)
 
 	if [[ $? -ne 0 ]]
 	then
 
-		$(is_defined rval) && echo "Failed to retrieve value of option \"${1}\"."
+		[[ -z $2 ]] && echo "Failed to retrieve value of option \"${1}\"."
 
 		return 1
 	fi
 
-
- 	$(is_defined rval) && rval=$cval || echo $cval
+	bind_param cval $2 || echo $cval
 }
 
 option_key_exists()
@@ -123,12 +131,11 @@ option_key_exists()
 
 get_option_keys()
 {
-	# prepare bind value with ref if given
-	[[ -n $1 ]] && [[ "$1" =~ ^:.+ ]] && declare xval="${1:1}" && declare -ag $xval && declare -n rval=$xval
-
-	declare -a cval=
+	declare -a cval
 
 	cval=$(options_manager get keys)
+
+	bind_param cval $1
 
 	$(is_defined rval) && rval=(${cval[@]}) || echo $cval
 }
@@ -138,7 +145,11 @@ options_parser()
 	declare -A collection
 
 	# check options format
-	[[ ! "${1}" =~ ^-(-?)(.+) ]] && echo "Given options \"${@}\" does not satisfy the expected format" && return 1;
+	if [[ ! "${1}" =~ ^-(-?)(.+) ]]
+	then
+		echo "Given options \"${@}\" does not satisfy the expected format"
+		exit 1
+	fi
 
 	# vars
 	declare ckey= entry= collector=
@@ -146,11 +157,19 @@ options_parser()
 	while read entry
 	do
 		# shift the retrieved params
-		shift;
+		shift
 
-		[[ -z $entry ]] && continue
+		if [[ -z $entry ]]
+		then
+			continue
+		fi
 
-		[[ "${entry}" == "--" ]] && [[ -n $ckey ]] && collector=true && break
+		# collector announcer
+		if [[ "${entry}" == "--" ]] && [[ -n $ckey ]]
+		then
+			collector=true
+			break
+		fi
 
 		# check if current entry is a key
 		if [[ "${entry}" =~ ^-(-?)(.+) ]]
@@ -202,9 +221,11 @@ options_parser()
 
 	done <<< "$(echo $@ | sed 's/\s/\n/g')"
 
-	[[ "$collector" == "true" ]] && [[ $# -gt 0 ]] && collection[$ckey]+=" ${@} " || collector=
-
-	[[ $? -ne 0 ]] && echo "Failed to parse given options: \"${@}\"" && return 1
+	# concat all remaining args into current key [ckey] value
+	if [[ "$collector" == "true" ]] && [[ $# -gt 0 ]]
+	then
+		collection[$ckey]+=" ${@} "
+	fi
 
 	# dump collection into tmp file
 	declare -p collection > $parsed_options
@@ -217,7 +238,9 @@ declare -xf options_manager
 declare -xf get_option_value
 declare -xf get_option_keys
 declare -xf option_key_exists
+
 # definition helpers
+declare -xf bind_param
 declare -xf is_defined
 declare -xf is_array
 declare -xf is_assoc_array

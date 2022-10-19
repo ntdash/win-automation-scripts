@@ -1,7 +1,5 @@
 #! /usr/bin/env bash
 
-[[ -z $cmd_name ]] && exit 1;
-
 declare -x cmd_pathname="${scripts_path}/commands/${cmd_name}"
 declare -x sub_cmd_pathname="${cmd_pathname}/subs"
 declare -x tprefix="copts-b"
@@ -36,6 +34,9 @@ do
 	fi
 
 	# if file source it
-	[[ -f $dot_path ]] && source $dot_path
+	if [[ -f $dot_path ]]
+	then
+		source $dot_path
+	fi
 
 done
