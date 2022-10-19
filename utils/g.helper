@@ -37,11 +37,19 @@ bind_param()
 	fi
 
 	# value-param && binding-param
-	declare b_param=${2:1} v_param=$1 v_type value
+	declare b_param=${2:1} v_param=$1 v_type value result
+
+	result=$(declare -p ${v_param} | sed -r "s/^declare -(.+) ${v_param}=(.+)$/\1:\2/" )
 
 	IFS=':'
-	read v_type value <<< "$( declare -p $v_param | sed -r '"s/^declare -(.+) $v_param=(.+)$/\1:\2/"')"
+	read v_type value <<< $result
 	IFS=
+
+	if [[ "$v_type" == "-" ]]
+	then
+		v_type=""
+		value=$( echo ${value} | sed 's/"//g' )
+	fi
 
 	declare -${v_type}g $b_param=$value
 }
@@ -106,7 +114,6 @@ options_manager()
 
 get_option_value()
 {
-	# encapsulation
 	declare cval
 
 	cval=$(options_manager get value $1)
@@ -114,7 +121,7 @@ get_option_value()
 	if [[ $? -ne 0 ]]
 	then
 
-		[[ -z $2 ]] && echo "Failed to retrieve value of option \"${1}\"."
+		[[ -z $2 ]] && echo "Failed to retrieve value of key: [${1}]"
 
 		return 1
 	fi
@@ -135,9 +142,7 @@ get_option_keys()
 
 	cval=$(options_manager get keys)
 
-	bind_param cval $1
-
-	$(is_defined rval) && rval=(${cval[@]}) || echo $cval
+	bind_param cval $1 || echo $cval
 }
 
 options_parser()
@@ -151,9 +156,11 @@ options_parser()
 		exit 1
 	fi
 
-	# vars
-	declare ckey= entry= collector=
+	declare ckey entry collector
 
+	declare argv="$@"
+
+	IFS=
 	while read entry
 	do
 		# shift the retrieved params
@@ -165,10 +172,17 @@ options_parser()
 		fi
 
 		# collector announcer
-		if [[ "${entry}" == "--" ]] && [[ -n $ckey ]]
+		if [[ "${entry}" == "--" ]]
 		then
-			collector=true
-			break
+
+			if [[ -n $ckey ]]
+			then
+				collector=true
+				break
+			else
+				echo "Format invalid for: $argv"
+				exit 1
+			fi
 		fi
 
 		# check if current entry is a key
