@@ -1,8 +1,12 @@
 # Directories ####
-**/config/**
 **/logs/**
 **/tmp/**
 
 # Files ##########
 *.tmp
 *.log
+
+
+# sub-commands
+	# vbox
+commands/vbox/subs/config/**
