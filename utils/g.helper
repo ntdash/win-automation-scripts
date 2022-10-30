@@ -120,9 +120,6 @@ get_option_value()
 
 	if [[ $? -ne 0 ]]
 	then
-
-		[[ -z $2 ]] && echo "Failed to retrieve value of key: [${1}]"
-
 		return 1
 	fi
 
