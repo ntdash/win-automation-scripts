@@ -13,14 +13,6 @@ then
 	exit 1
 fi
 
-
-if [[ -z $vname ]] && [[ "$cmd_name" != "--" ]]
-then
-	echo "Missing following arguments: Virtual Machine Name"
-	exit 1
-fi
-
-
 # resolve [--] short hand
 if [[ "$cmd_name" == "--" ]]
 then
@@ -46,7 +38,7 @@ then
 fi
 
 # parse options if provided
-if [[ -n $options ]]
+if [[ ${#options} -gt 0 ]]
 then
 	options_parser ${options[@]}
 fi
