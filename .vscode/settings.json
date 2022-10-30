@@ -1,0 +1,7 @@
+{
+	"files.associations": {
+		"**/utils/*": "shellscript",
+		"**/.*": "shellscript",
+		"*.note": "markdown"
+	}
+}
