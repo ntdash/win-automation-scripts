@@ -1,7 +1,9 @@
 {
 	"files.associations": {
-		"**/utils/*": "shellscript",
+		"**/*.stub": "properties",
+		"**/utils/g.*": "shellscript",
+		"**/utils/.*": "shellscript",
 		"**/.*": "shellscript",
-		"*.note": "markdown"
+		"**/*.note": "markdown",
 	}
 }
