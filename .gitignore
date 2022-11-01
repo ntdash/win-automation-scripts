@@ -6,7 +6,4 @@
 *.tmp
 *.log
 
-
-# sub-commands
-	# vbox
-commands/vbox/subs/config/**
+commands/vbox/subs/config/data/*

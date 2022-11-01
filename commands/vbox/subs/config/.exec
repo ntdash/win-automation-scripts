@@ -1,0 +1,122 @@
+#! /usr/bin/env bash
+
+# check the presence of vnmae
+if [[ -z $vname ]]
+then
+	echo "Missing VirtualBox name"
+	exit 1
+fi
+
+# retrieve keys
+get_option_keys :keys
+
+# no combo is expected so, any number higher than 1 corresponding to the length of list of keys will result to an early exit.
+if [[ ${#keys[@]} -ne 1 ]]
+then
+	echo "No more than one option expected"
+	exit 1
+fi
+
+# set option
+declare option="${keys[0]}"
+
+echo $option | grep -Ei '^(list|get|update|create)$' > /dev/null
+
+# early exit when unxepected option given
+if [[ $? -ne 0 ]]
+then
+
+	declare prefix=
+
+	[[ ${#option} -gt 1 ]] && prefix='--' || prefix='-'
+
+	echo " Unexpected option : \"${prefix}${option}\" given"
+
+	exit 1
+fi
+
+
+# set possible config file base on given vname
+declare possible_config_file="${cwd}/data/${vname}.conf"
+
+
+case $option in
+
+	create)
+
+		# early exit when config file already exists for $vname
+		if [[ -f $possible_config_file ]]
+		then
+			echo "${vname} config already set. Consider updating its attributes instead."
+			exit 1
+		fi
+
+		# get template
+		declare stub_file="${cwd}/utils/vm.stub"
+
+		if [[ ! -f  $stub_file  ]]
+		then
+			echo "Missing Virtualbox config template"
+			exit 127
+		fi
+
+		# copy template content into new config file
+		cat $stub_file > $possible_config_file
+
+		# load template [ps: internal file check up withing the loading function]
+		load_config $possible_config_file
+
+		#retrieve keys
+		list_attrs :attrs
+
+		# updated neccessary value
+		declare key= value=
+		declare -a collection=()
+
+		for key in ${!attrs[@]}
+		do
+			if [[ "$key" == "state" ]]
+			then
+				continue
+			fi
+
+			read -p "$key: " value
+
+			collection+=($key $value)
+		done
+
+		set_attrs ${collection[@]}
+	;;
+
+	*)
+
+		if [[ ! -f $possible_config_file ]]
+		then
+			echo "Config file not found for Virtual machine of the name: [${vname}]."
+			exit 1
+		fi
+
+		# load config file
+		load_config $possible_config_file
+
+		case $option in
+			list)
+				list_attrs
+			;;
+			get)
+				get_option_value get :param
+				get_attr $param
+			;;
+			update)
+				get_option_value update :params
+
+				declare IFS='='
+				declare -a attrs="("$(echo $params)")"
+
+				set_attrs ${attrs[@]}
+			;;
+		esac
+	;;
+esac
+
+exit 0
