@@ -2,7 +2,6 @@
 
 vboxmanage ()
 {
-	declare IFS=' '
 	"${vboxmanage_exec_path}" $@
 }
 
