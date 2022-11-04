@@ -1,13 +1,9 @@
 #! /usr/bin/env bash
 
 declare -xg subcommand_pathname="${command_pathname}/subs"
-declare -x tprefix="copts-b"
 
-# parsed_options buffer
-declare -x parsed_options="$(mktemp -t ${tprefix}.${command_name}.XXXXXXX)"
-
-# remove when exiting
-trap "rm -f ${parsed_options}" EXIT
+# serialized parsed options
+declare -x serialized_parsed_options=""
 
 # load subcommnd helper.d's content
 

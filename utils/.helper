@@ -56,8 +56,7 @@ bind_param()
 
 options_manager()
 {
-	# load parsed_options
-	source $parsed_options
+	declare -A collection="$serialized_parsed_options"
 
 	# throw error if collection not defined
 	# echo "Failed to retrieve parsed option's collection."
@@ -238,8 +237,8 @@ options_parser()
 		collection[$ckey]+=" ${@} "
 	fi
 
-	# dump collection into tmp file
-	declare -p collection > $parsed_options
+	# serialize associative array
+	serialized_parsed_options="$(declare -p collection | sed -r 's/^declare -[aA] collection=(.*)$/\1/')"
 }
 
 # option helpers
