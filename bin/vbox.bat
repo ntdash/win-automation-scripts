@@ -2,7 +2,7 @@
 setlocal
 
 set cmd_name="vbox"
-set exe_pathname="%scripts_path%\utils\.bootstrap"
+set exe_pathname="%scripts_path%\bootstrap\.default"
 
 if not exist %exe_pathname% ( goto :not_found )
 

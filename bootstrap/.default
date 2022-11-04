@@ -1,0 +1,62 @@
+#! /usr/bin/env bash
+
+declare -xg command_name="${1}"
+
+# command args
+declare argv="${@:2}"
+
+
+# Quit if command not provide (a little bit dummy but ... )
+
+if [[ -z $command_name ]]
+then
+	echo "${command_name}: command not found"
+	exit 1
+fi
+
+declare -xg root_basename=$(dirname $(dirname $0))
+
+declare -xg command_pathname="${root_basename}/commands/${command_name}"
+
+declare command_exec_filepath="${command_pathname}/.exec"
+
+declare partial_bname="${root_basename}/utils" partial_filepath= profile_filepath=
+
+
+if [[ ! -f ${command_exec_filepath} ]]
+then
+	echo "Failed to execute ${command_name}'s \`.exec\` file at: ${command_exec_filepath}"
+	exit 127
+fi
+
+
+# load all utils script apart `.profile`
+
+while read partial_filepath
+do
+
+	if [[ "$(basename ${partial_filepath})" == ".profile" ]]
+	then
+		profile_filepath="${partial_filepath}"
+	else
+		source ${partial_filepath}
+	fi
+
+done <<< "$( find ${partial_bname} -type f -iname '.*' )"
+
+
+
+if [[ -z "${profile_filepath}" ]]
+then
+	echo "Failed to load main profile's file at: ${profile_filepath}"
+	exit 127
+fi
+
+
+# load main profile at last
+
+source $profile_filepath
+
+# execute command `.exec` file
+
+bash $command_exec_filepath ${argv[@]}

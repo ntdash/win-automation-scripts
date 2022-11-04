@@ -1,41 +1,48 @@
 #! /usr/bin/env bash
 
+# attemp to retrieve vname
+
 declare possible_vname=
 read possible_vname <<< "$(echo $* | sed -r 's/.*:([^[:space:]]+)$/\1/')"
 
+# retrieve subcommand_name and options
+
 declare sed_pattern= sed_substitution= sed_result=
 
-
+# default pattern not expecting a vname
 sed_pattern='^([^[:space:]]+)(.*)'
 sed_substitution='\1:\2'
 
 
-# if vname still match list of passed argument then retrival failed
-if [[ "$*" != "$possible_vname" ]]
+# Note: sed return whole line if substitution fail therefore
+# (suite)->  if vname still match list of passed argument then vname is not provided
+
+
+# if retrieval succed then procced on retrieving subcommand-name and its options
+if [[ "$*" != "${possible_vname}" ]]
 then
-	sed_pattern+="[[:space:]]:"$possible_vname"\$"
+	# pattern expecting a vname therefore limited at the end by the vname
+	sed_pattern+="[[:space:]]:"${possible_vname}"\$"
 	declare vname="${possible_vname}"
 fi
-
 
 sed_result=$(echo "$*" | sed -r  "s/${sed_pattern}/${sed_substitution}/")
 
 declare IFS=':'
-read cmd_name options <<< $sed_result
+read subcommand_name options <<< $sed_result
 declare IFS=
 
 
-
-if [[ -z $cmd_name ]]
+if [[ -z "${subcommand_name}" ]]
 then
-	echo "Missing following arguments: Sub-Command"
+	echo "${command_name}: ${subcommand_name} not found"
 	exit 1
 fi
 
 # resolve [--] short hand
-if [[ "$cmd_name" == "--" ]]
+if [[ "${subcommand_name}" == "--" ]]
 then
-	cmd_name="raw"
+	subcommand_name="raw"
 	options="-q -- ${options} ${vname}"
 else
 	# export vname
@@ -47,13 +54,15 @@ declare -a options="(${options})"
 
 
 # form subcommand exec pathname
-resolved_path="${sub_cmd_pathname}/${cmd_name}"
-dot_exec="${resolved_path}/.exec"
+declare resolved_path="${subcommand_pathname}/${subcommand_name}"
+
+
+declare subcommand_exec_filepath="${resolved_path}/.exec"
 
 # throw error if no exec file is found
-if [[ ! -f $dot_exec ]]
+if [[ ! -f $subcommand_exec_filepath ]]
 then
-	echo "Sub-command exec file not found at: \"${dot_exec}\""
+	echo "${subcommand_name} exec file not found at: \"${subcommand_exec_filepath}\""
 fi
 
 # parse options if provided
@@ -66,5 +75,5 @@ fi
 declare -x cwd=$resolved_path
 
 # execute subcommand
-bash $dot_exec
+bash $subcommand_exec_filepath
 
