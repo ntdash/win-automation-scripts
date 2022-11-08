@@ -92,7 +92,7 @@ options_manager()
 
 		"check")
 
-			[[ " ${!collection[@]} " =~ $3 ]] && rcode=0 || rcode=1
+			key_exists_in $2 'collection' && rcode=0 || rcode=1
 		;;
 
 		# echo "Failed to proccess \"${1}\""
@@ -241,6 +241,25 @@ options_parser()
 	serialized_parsed_options="$(declare -p collection | sed -r 's/^declare -[aA] collection=(.*)$/\1/')"
 }
 
+
+# $1: key \n
+# $2: assoc-array-name
+# error_message "Missing one of the two required params"
+key_exists_in()
+{
+	if [[ -z "$1" ]] || [[ -z "$2" ]]
+	then
+		return 1
+	fi
+
+	! $( is_assoc_array $2 ) && return 1
+
+	declare -p $2 | grep -oE '\['$1'\]' > /dev/null
+
+	return $?
+}
+
+
 # option helpers
 declare -xf options_parser
 declare -xf options_manager
@@ -254,3 +273,4 @@ declare -xf bind_param
 declare -xf is_defined
 declare -xf is_array
 declare -xf is_assoc_array
+declare -xf key_exists_in
