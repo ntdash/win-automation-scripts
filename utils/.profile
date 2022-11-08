@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 
+declare -xg command_data_pathname="${root_basename}/data/${command_name}"
 declare -xg subcommand_pathname="${command_pathname}/subs"
 
 # serialized parsed options

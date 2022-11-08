@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"**/*.stub": "properties",
+		"**/data/**/*.conf": "properties",
 		"**/.*": "shellscript",
 		"**/*.note": "markdown",
 	}

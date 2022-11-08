@@ -6,4 +6,4 @@
 *.tmp
 *.log
 
-commands/vbox/subs/config/data/*
+data/vbox/conf.d/*
