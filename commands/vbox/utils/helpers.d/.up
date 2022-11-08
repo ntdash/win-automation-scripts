@@ -1,0 +1,79 @@
+load_available_vnames()
+{
+	$(is_assoc_array available_vnames) && return 0
+
+	declare -xAg available_vnames=()
+
+	declare name= id=
+	while read name id
+	do
+		available_vnames[$name]="$id"
+	done <<< "$(vboxmanage list vms | sed 's/[{"\""}]//g')"
+
+}
+
+
+resolve_vname()
+{
+
+	key_exists_in $1 "available_vnames"
+
+	if [[ $? -ne 0 ]]
+	then
+		echo "[$1] not found in list of available virtualbox name"
+		echo "Choose among the available ones:"
+
+		declare -a name_collection="(${!available_vnames[@]})"
+		declare name=
+		declare -i count=0
+
+		for name in ${name_collection[@]}
+		do
+			count=$(($count + 1))
+			echo -e "    ${count}. ${name}"
+		done
+
+
+		# read -p "Choose corresponding number: " choice
+		echo "Choose a corresponding number or \"q\" to abort the operation..."
+		declare choice= resolved=
+
+		while read -p "> " choice
+		do
+			if [[ "${choice}" == "q" ]] || [[ "${choice}" == "Q" ]]
+			then
+				echo "Aborting..."
+				exit 0
+			fi
+
+			declare -i parsed_choice="${choice}"
+
+			if [[ "${choice}" == "0" ]] || [[ $parsed_choice -lt 0 ]] || [[ $parsed_choice -gt $count ]]
+			then
+				echo "out of range"
+				continue
+			fi
+
+			if [[ $parsed_choice -eq 0 ]]
+			then
+				echo "not a number"
+				continue
+			fi
+
+			resolved="true"
+			break
+		done
+
+		if [[ -z "$resolved" ]]
+		then
+			echo "Unexpected error occured."
+			exit 1
+		fi
+
+		vname=${name_collection[$(($choice - 1))]}
+	fi
+
+}
+
+declare -xf resolve_vname
+declare -xf load_available_vnames
