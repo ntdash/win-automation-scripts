@@ -2,4 +2,4 @@
 
 > Dependencies
 
--  Oracle VirtualBox sotfware
+- Oracle [Virtualbox](https://www.virtualbox.org/) software
