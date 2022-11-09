@@ -1,25 +1,3 @@
 # Important
 
-use
-
-```bash
-$(declare -p collection | sed -r 's/^declare -[aA] collection=(.*)$/\1/')
-```
-
-to serialize arrays for export allowing to avoid the uncleaned tmp_file for temporary storage
-
-## Refact list
-
-- Prompt possibility of config based on existing vbox machine if none provide
-
-```bash
-vboxmanage list vms
-```
-
-- Check against existing vbox and prompt creation possibility if
-  - no config_file found
-  - partial match of provided wkspace
-
- ```bash
-vboxmanage list vms
- ```
+help options on command and subcommands.
