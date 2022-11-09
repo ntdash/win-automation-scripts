@@ -1,0 +1,22 @@
+#! /usr/bin/env bash
+
+# vbox list [-r|null]
+
+get_option_keys :keys
+
+if [[ ${#keys[@]} -gt 1 ]]
+then
+	echo "No more than one option expected."
+	exit 1
+fi
+
+declare key=${keys[0]} command_suite="vms"
+
+
+case $key in
+	r)
+		command_suite="runningvms"
+	;;
+esac
+
+vboxmanage list $command_suite
