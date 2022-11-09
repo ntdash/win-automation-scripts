@@ -10,9 +10,6 @@ then
 	exit 1
 fi
 
-# load available list of vnames
-load_available_vnames
-
 # resolve vname
 resolve_vname $vname
 

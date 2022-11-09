@@ -15,6 +15,8 @@ load_available_vnames()
 
 resolve_vname()
 {
+	# load vnames
+	load_available_vnames
 
 	key_exists_in $1 "available_vnames"
 
