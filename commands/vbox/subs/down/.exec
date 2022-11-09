@@ -1,0 +1,33 @@
+#! /usr/bin/env bash
+
+# vbox down [-f|null] :vname
+
+# check vname availability
+
+if [[ -z "$vname" ]]
+then
+	echo "Missing virtual machine name"
+	exit 1
+fi
+
+# load available list of vnames
+load_available_vnames
+
+# resolve vname
+resolve_vname $vname
+
+# check physical state
+vboxmanage list runningvms | grep -i $vname > /dev/null
+
+# quit if vname is not a running virtual machine
+if [[ $? -ne 0 ]]
+then
+	echo "Virtual machine [\"${vname}\"] not running."
+	exit 1
+fi
+
+# close all all remotely related to the vm
+
+
+# close it
+vboxmanage controlvm $vname poweroff
