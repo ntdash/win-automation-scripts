@@ -5,4 +5,54 @@ vboxmanage ()
 	"${vboxmanage_exec_path}" $@
 }
 
+
+start_vm()
+{
+	declare -i rcode=0
+
+	vboxmanage startvm ${1:-$vname} --type headless 2> /dev/null
+
+	rcode=$?
+
+	if [[ $rcode -eq 0 ]]
+	then
+		set_attr state running
+		save_vm_config
+	fi
+
+	return $rcode
+}
+
+stop_vm()
+{
+	echo "Closing virtual machine [\"${vname}\"]..."
+
+	declare -i rcode=0
+
+	vboxmanage controlvm ${1:-$vname} poweroff
+
+	rcode=$?
+
+	if [[ $rcode -eq 0 ]]
+	then
+		set_attr state idle
+		save_vm_config
+	fi
+
+	return $rcode
+
+}
+
+is_vm_running()
+{
+	vboxmanage list runningvms | grep -i ${1:-$vname} > /dev/null
+
+	return $?
+}
+
 declare -xf vboxmanage
+
+declare -xf is_vm_running
+
+declare -xf start_vm
+declare -xf stop_vm

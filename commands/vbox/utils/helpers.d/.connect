@@ -1,0 +1,69 @@
+connect_vm_host()
+{
+	# load config
+	load_vm_config
+
+	# possible variable
+	declare -a pv_table=('user' 'host')
+	declare table_updated='false' attr=
+
+	for attr in ${pv_table[@]}
+	do
+		declare ${attr}="${parsed_config[$attr]}"
+		declare -n ref=$attr
+
+		if [[ -z $ref ]] || [[ "${ref}" == ":${attr}" ]]
+		then
+			echo "Attribute [\"$attr\"] not defined. Will you want to define one ? [Y/n]"
+
+			declare choice='y'
+			read -p '> ' choice
+
+			choice=${choice:-'y'}
+
+			if [[ ! "${choice}" =~ [yY] ]]
+			then
+				echo "Aborting..."
+				exit 1
+			fi
+
+			ref=${choice}
+			table_updated="true"
+		fi
+	done
+
+	# persit any change
+	if [[ "${table_updated}" == "true" ]]
+	then
+		save_vm_config
+	fi
+
+	declare -i rcode=0
+
+	# ping vm ip
+	ping -n 1 -w 500 $host > /dev/null
+
+	if [[ $? -eq 0 ]]
+	then
+		echo -e "Trying connecting through ssh with:\nHost: ${host}\nUser: ${user}\n..."
+		# on-success connect to it
+		ssh -l $user $host 2> /dev/null
+
+		if [[ $? -ne 0 ]]
+		then
+			echo "Failed to connect to virtual machine: [\"${vname}\"]."
+			rcode=1
+		fi
+
+		echo "Closing connection to [\"${vname}\"]."
+
+	else
+		# print error message
+		echo "Failed to connect to virtual machine: [\"${vname}\"]."
+		rcode=1
+	fi
+
+	return $rcode
+}
+
+declare -xf connect_vm_host

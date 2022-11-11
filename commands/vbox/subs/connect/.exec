@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# vbox connect [-f|null] :vname
+# vbox exec -[i|null] :vname [arg...]
 
 # check vname availability
 
@@ -13,103 +13,8 @@ fi
 # resolve vname
 resolve_vname $vname
 
-# check physical state
-vboxmanage list runningvms | grep -i $vname > /dev/null
-
-# quit if vname is not a running virtual machine
-if [[ $? -ne 0 ]]
-then
-	echo "Virtual machine [\"${vname}\"] not running."
-	exit 1
-fi
-
-# check vm config
-check_vm_config > /dev/null
-
-# prompt creating choice based on return code
-if [[ $? -ne 0 ]]
-then
-	echo -e "Virtual machine [\"${vname}\"] config not found.\nWant to create one ? [Y/n]"
-
-	# yes : create
-	declare choice='y'
-	read -p '> ' choice
-
-	choice=${choice:-'y'}
-
-	# no : quit
-	if [[ ! "${choice}" =~ [yY] ]]
-	then
-		echo "Aborting..."
-		exit 1
-	fi
-
-	# create a new config file
-	create_vm_config
-fi
-
-# load config
-load_vm_config
-
-# possible variable
-declare -a pv_table=('user' 'host')
-declare table_updated='false' attr=
-
-for attr in ${pv_table[@]}
-do
-	declare ${attr}="${parsed_config[$attr]}"
-	declare -n ref=$attr
-
-
-	if [[ -z $ref ]] || [[ "${ref}" == ":${attr}" ]]
-	then
-		echo "Attribute [\"$attr\"] not defined. Will you want to define one ? [Y/n]"
-
-		declare choice='y'
-		read -p '> ' choice
-
-		choice=${choice:-'y'}
-
-		if [[ ! "${choice}" =~ [yY] ]]
-		then
-			echo "Aborting..."
-			exit 1
-		fi
-
-		ref=${choice}
-		table_updated="true"
-	fi
-done
-
-# persit any change
-if [[ "${table_updated}" == "true" ]]
-then
-	save_vm_config
-fi
-
 declare -i rcode=0
 
-# ping vm ip
-ping -n 1 -w 500 $host 2>&1 > /dev/null
+connect_vm_host
 
-if [[ $? -eq 0 ]]
-then
-	echo -e "Trying connecting through ssh with:\nHost: ${host}\nUser: ${user}\n..."
-	# on-success connect to it
-	ssh -l $user $host 2> /dev/null
-
-	echo "Closing connection to [\"${vname}\"]."
-
-	if [[ $? -ne 0 ]]
-	then
-		echo "Failed to connect to virtual machine: [\"${vname}\"]."
-		rcode=1
-	fi
-
-else
-	# print error message
-	echo "Failed to connect to virtual machine: [\"${vname}\"]."
-	rcode=1
-fi
-
-exit $rcode
+rcode=$?

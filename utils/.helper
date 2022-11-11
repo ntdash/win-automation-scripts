@@ -127,7 +127,7 @@ get_option_value()
 
 option_key_exists()
 {
-	options_manager check $1 2>&1 /dev/null
+	options_manager check $1 > /dev/null
 
 	return $?
 }
@@ -189,7 +189,7 @@ options_parser()
 			if [[ -z ${BASH_REMATCH[1]} ]]
 			then
 
-				declare list=`echo ${BASH_REMATCH[2]} | grep -o .`
+				declare -a list="($(echo ${BASH_REMATCH[2]} | grep -o .))"
 
 				if [[ ${#list[@]} -gt 1 ]]
 				then

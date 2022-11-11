@@ -14,7 +14,7 @@ fi
 resolve_vname $vname
 
 # check physical state
-vboxmanage list runningvms | grep -i $vname > /dev/null
+is_vm_running
 
 # Warning message if already powerred
 if [[ $? -eq 0 ]]
@@ -23,118 +23,63 @@ then
 	exit 1
 fi
 
-# check vm config
-check_vm_config > /dev/null
-
-# prompt creating choice based on return code
-if [[ $? -ne 0 ]]
-then
-	echo -e "Virtual machine [\"${vname}\"] config not found.\nWant to create one ? [Y/n]"
-
-	# yes : create
-	declare choice='y'
-	read -p '> ' choice
-
-	choice=${choice:-'y'}
-
-	# no : quit
-	if [[ ! "${choice}" =~ [yY] ]]
-	then
-		echo "Aborting..."
-		exit 1
-	fi
-
-	# create a new config file
-	create_vm_config
-fi
-
+# check and create if config does not exists
+check_and_create_if_not_exists
 
 # change vname state into: pending
 set_attr state pending
 
 # launch vm
-vboxmanage startvm "${vname}" --type headless 2> /dev/null
+start_vm
+
+if [[ $? -ne 0 ]]
+then
+	set_attr state idle
+	echo "Error occured while starting the virtual machine [\"${vname}\"]"
+	exit 1
+fi
+
+# auto_close option
+declare -xg auto_close="true"
 
 # detach option provided ?
 option_key_exists 'd'
 
-if [[ $? -ne 0 ]]
+if [[ $? -eq 0 ]]
 then
 
-	# possible variable
-	declare -a pv_table=('user' 'host')
-	declare table_updated='false' attr=
+	auto_close="false"
 
-	for attr in ${pv_table[@]}
-	do
-		declare ${attr}="${parsed_config[$attr]}"
-		declare -n ref=$attr
+	# prevent auto_close on connection exit if (-i:interactive is) provided
+	option_key_exists 'i'
 
-		if [[ -z $ref ]] || [[ "${ref}" == ":${attr}" ]]
-		then
-			echo "Attribute [\"$attr\"] not defined. Will you want to define one ? [Y/n]"
-
-			declare choice='y'
-			read -p '> ' choice
-
-			choice=${choice:-'y'}
-
-			if [[ ! "${choice}" =~ [yY] ]]
-			then
-				echo "Aborting..."
-				exit 1
-			fi
-
-			ref=${choice}
-			table_updated="true"
-		fi
-	done
-
-	# persit any change
-	if [[ "${table_updated}" == "true" ]]
-	then
-		save_vm_config
-	fi
-
-	declare -i rcode=0
-
-	# ping vm ip
-	ping -n 1 -w 500 $host 2>&1 > /dev/null
 
 	if [[ $? -ne 0 ]]
 	then
-		echo -e "Trying connecting through ssh with:\nHost: ${host}\nUser: ${user}\n..."
-		# on-success connect to it
-		ssh -l $user $host 2> /dev/null
 
-		echo "Closing connection to [\"${vname}\"]."
-
-		if [[ $? -ne 0 ]]
-		then
-			echo "Failed to connect to virtual machine: [\"${vname}\"]."
-			rcode=1
-		fi
-
-	else
-		# print error message
-		echo "Failed to connect to virtual machine: [\"${vname}\"]."
-		rcode=1
+		exit 0
 	fi
-
-	# check if the network is still up running
-	vboxmanage list runningvms | grep -i $vname > /dev/null
-
-	if [[ $? -eq 0 ]]
-	then
-		vboxmanage controlvm $vname poweroff
-	fi
-
-	exit $rcode
 fi
 
-# no: quit
-exit 0
+declare -i rcode=0
 
+connect_vm_host
 
+rcode=$?
+
+# check if the network is still up running
+is_vm_running
+
+if [[ $? -eq 0 ]]
+then
+
+	if [[ "${auto_close}" == "true" ]]
+	then
+
+		stop_vm
+	fi
+fi
+
+exit $rcode
 
 
