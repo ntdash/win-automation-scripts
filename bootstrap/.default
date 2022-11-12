@@ -1,5 +1,18 @@
 #! /usr/bin/env bash
 
+# sed pattern
+declare asking_help_reg_pattern='^(.*) -(-help|h)$'
+declare -xg asking_help="false"
+
+if [[ "$@" =~ $asking_help_reg_pattern ]]
+then
+
+	set -- ${BASH_REMATCH[1]}
+
+	asking_help="true"
+fi
+
+
 declare -xg command_name="${1}"
 
 # command args
