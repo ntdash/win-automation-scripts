@@ -1,9 +1,42 @@
 #! /usr/bin/env bash
 
+declare -xg rmessage="Exit unexpectedly !"
+
 cleanup()
 {
-	# cleanup parsed options
-	return 0
+	# $1: message
+	declare profile_filepath="${data_pathname}/.rprofile" filename="index"
+
+	if [[ ! -f $profile_filepath ]]
+	then
+		echo $rmessage;
+		exit 1;
+	fi
+
+	# source the file
+	source $profile_filepath
+
+	if [[ $rcode -eq 0 ]]
+	then
+		exit 0
+	fi
+
+	# check for subcommand_name
+
+	if [[ -n "$subcommand_name" ]]
+	then
+		filename="${subcommand_name}"
+	fi
+
+	declare man_filepath="${command_pathname}/man/${filename}"
+
+	cat $man_filepath
+
+	echo -e "\n[Error report] \n  (code: ${rcode}) > ${rmessage:-""}"
+
+	truncate -s 0 $profile_filepath
 }
 
 # trap cleanup EXIT
+
+trap cleanup 1 2 3 8 15 EXIT

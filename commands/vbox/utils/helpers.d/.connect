@@ -23,8 +23,7 @@ connect_vm_host()
 
 			if [[ ! "${choice}" =~ [yY] ]]
 			then
-				echo "Aborting..."
-				exit 1
+				r_quit 1 "Aborting..."
 			fi
 
 			ref=${choice}
@@ -51,16 +50,14 @@ connect_vm_host()
 
 		if [[ $? -ne 0 ]]
 		then
-			echo "Failed to connect to virtual machine: [\"${vname}\"]."
-			rcode=1
+			r_quit 1 "Failed to connect to virtual machine: [\"${vname}\"]."
 		fi
 
 		echo "Closing connection to [\"${vname}\"]."
 
 	else
 		# print error message
-		echo "Failed to connect to virtual machine: [\"${vname}\"]."
-		rcode=1
+		r_quit 1 "Failed to connect to virtual machine: [\"${vname}\"]."
 	fi
 
 	return $rcode

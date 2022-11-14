@@ -65,11 +65,14 @@ then
 	exit 127
 fi
 
-
 # load main profile at last
-
 source $profile_filepath
 
 # execute command `.exec` file
-
 bash $command_exec_filepath ${argv[@]}
+
+# quit
+if [[ $? -eq 0 ]]
+then
+	r_quit 0 "Quit normaly"
+fi

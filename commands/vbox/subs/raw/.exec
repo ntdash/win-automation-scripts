@@ -2,6 +2,6 @@
 
 get_option_value q :query
 
-! $(is_defined query) && echo "Failed to retrieve query's option value" && exit 1
+! is_defined query && r_quit 1 "Failed to retrieve query's option value"
 
 vboxmanage $query

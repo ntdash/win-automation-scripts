@@ -3,8 +3,7 @@
 # check the presence of vnmae
 if [[ -z $vname ]]
 then
-	echo "Missing virtualbox name."
-	exit 1
+	r_quit 1 "Missing virtualbox name."
 fi
 
 # retrieve keys
@@ -13,8 +12,7 @@ get_option_keys :keys
 # no combo is expected so, any number higher than 1 corresponding to the length of list of keys will result to an early exit.
 if [[ ${#keys[@]} -ne 1 ]]
 then
-	echo "No more than one option expected."
-	exit 1
+	r_quit 1 "No more than one option expected."
 fi
 
 # set option
@@ -30,9 +28,7 @@ then
 
 	[[ ${#option} -gt 1 ]] && prefix='--' || prefix='-'
 
-	echo " Unexpected option: \"${prefix}${option}\" given."
-
-	exit 1
+	r_quit 1 "Unexpected option: \"${prefix}${option}\" given."
 fi
 
 

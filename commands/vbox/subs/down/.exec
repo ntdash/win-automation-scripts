@@ -6,8 +6,7 @@
 
 if [[ -z "$vname" ]]
 then
-	echo "Missing virtual machine name"
-	exit 1
+	r_quit 1 "Missing virtual machine name"
 fi
 
 # resolve vname
@@ -19,8 +18,7 @@ vboxmanage list runningvms | grep -i $vname > /dev/null
 # quit if vname is not a running virtual machine
 if [[ $? -ne 0 ]]
 then
-	echo "Virtual machine [\"${vname}\"] not running."
-	exit 1
+	r_quit 1 "Virtual machine [\"${vname}\"] not running."
 fi
 
 # close all all remotely related to the vm

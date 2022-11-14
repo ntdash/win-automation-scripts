@@ -13,7 +13,7 @@ is_array()
 {
 	declare patttern="^declare -[aA]"
 
-	[[ "$(declare -p ${1} 2>/dev/null)" =~ $patttern ]]
+	[[ "$(declare -p ${1} 2> /dev/null)" =~ $patttern ]]
 
 	return $?
 }
@@ -23,7 +23,7 @@ is_assoc_array()
 {
 	declare patttern="^declare -A"
 
-	[[ "$(declare -p ${1} 2>/dev/null)" =~ $patttern ]]
+	[[ "$(declare -p ${1} 2> /dev/null)" =~ $patttern ]]
 
 	return $?
 }
@@ -60,7 +60,7 @@ options_manager()
 
 	# throw error if collection not defined
 	# echo "Failed to retrieve parsed option's collection."
-	! $(is_assoc_array collection) && return 1
+	! is_assoc_array collection && return 1
 
 	# declare local returners
 	declare -i rcode=0
@@ -257,8 +257,37 @@ key_exists_in()
 	declare -p $2 | grep -oE '\['$1'\]' > /dev/null
 
 	return $?
+
 }
 
+r_quit()
+{
+	declare profile_filepath="${data_pathname}/.rprofile"
+
+	if [[ ! -f  $profile_filepath ]]
+	then
+		exit 1
+	fi
+
+	truncate -s 0 $profile_filepath
+
+	declare -i rcode=${1:-'1'}
+
+	declare rmessage=$2  entry=
+
+	declare -a possible_var=('subcommand_name' 'rcode' 'rmessage')
+
+	for entry in ${possible_var[@]}
+	do
+		declare -p $entry 2> /dev/null >> $profile_filepath
+	done
+
+	exit $rcode
+
+}
+
+# cleanup functions
+declare -xf r_quit
 
 # option helpers
 declare -xf options_parser

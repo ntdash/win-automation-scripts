@@ -35,8 +35,7 @@ declare IFS=
 
 if [[ -z "${subcommand_name}" ]]
 then
-	echo "${command_name}: ${subcommand_name} not found"
-	exit 1
+	r_quit 1 "${command_name}: ${subcommand_name} not found"
 fi
 
 # resolve [--] short hand
@@ -62,7 +61,7 @@ declare subcommand_exec_filepath="${resolved_path}/.exec"
 # throw error if no exec file is found
 if [[ ! -f $subcommand_exec_filepath ]]
 then
-	echo "${subcommand_name} exec file not found at: \"${subcommand_exec_filepath}\""
+	r_quit 127 "${subcommand_name} exec file not found at: \"${subcommand_exec_filepath}\""
 fi
 
 # parse options if provided
@@ -76,4 +75,3 @@ declare -x cwd=$resolved_path
 
 # execute subcommand
 bash $subcommand_exec_filepath
-

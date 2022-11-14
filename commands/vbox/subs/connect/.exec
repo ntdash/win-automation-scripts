@@ -6,8 +6,7 @@
 
 if [[ -z "$vname" ]]
 then
-	echo "Missing virtual machine name"
-	exit 1
+	r_quit 1 "Missing virtual machine name"
 fi
 
 # resolve vname

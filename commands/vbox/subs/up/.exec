@@ -6,7 +6,7 @@
 
 if [[ -z "$vname" ]]
 then
-	echo "Missing virtual machine name"
+	rmessage="Missing virtual machine name"
 	exit 1
 fi
 
@@ -19,7 +19,7 @@ is_vm_running
 # Warning message if already powerred
 if [[ $? -eq 0 ]]
 then
-	echo -e "Virtual machine [\"${vname}\"] already on.\nConsider:\n    - [connect] - Connecting to it through ssh\n    - [down] - Shutting it down"
+	rmessage="Virtual machine [\"${vname}\"] already on.\nConsider:\n    - [connect] - Connecting to it through ssh\n    - [down] - Shutting it down"
 	exit 1
 fi
 
@@ -35,7 +35,7 @@ start_vm
 if [[ $? -ne 0 ]]
 then
 	set_attr state idle
-	echo "Error occured while starting the virtual machine [\"${vname}\"]"
+	rmessage="Error occured while starting the virtual machine [\"${vname}\"]"
 	exit 1
 fi
 

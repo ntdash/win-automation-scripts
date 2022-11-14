@@ -1,7 +1,11 @@
 #! /usr/bin/env bash
 
-declare -xg command_data_pathname="${root_basename}/data/${command_name}"
-declare -xg subcommand_pathname="${command_pathname}/subs"
+# data related
+declare -x data_pathname="${root_basename}/data"
+declare -x command_data_pathname="${data_pathname}/${command_name}"
+
+# subcommand related
+declare -x subcommand_name="" subcommand_pathname="${command_pathname}/subs"
 
 # serialized parsed options
 declare -x serialized_parsed_options=""

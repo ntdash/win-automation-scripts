@@ -44,21 +44,20 @@ resolve_vname()
 		do
 			if [[ "${choice}" == "q" ]] || [[ "${choice}" == "Q" ]]
 			then
-				echo "Aborting..."
-				exit 0
+				r_quit 0 "Aborting..."
 			fi
 
 			declare -i parsed_choice="${choice}"
 
 			if [[ "${choice}" == "0" ]] || [[ $parsed_choice -lt 0 ]] || [[ $parsed_choice -gt $count ]]
 			then
-				echo "out of range"
+				echo "Out of range"
 				continue
 			fi
 
 			if [[ $parsed_choice -eq 0 ]]
 			then
-				echo "not a number"
+				echo "Not a number"
 				continue
 			fi
 
@@ -68,8 +67,7 @@ resolve_vname()
 
 		if [[ -z "$resolved" ]]
 		then
-			echo "Unexpected error occured."
-			exit 1
+			r_quit 1 "Unexpected error occured."
 		fi
 
 		vname=${name_collection[$(($choice - 1))]}
