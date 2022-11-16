@@ -16,6 +16,8 @@ cleanup()
 	# source the file
 	source $profile_filepath
 
+	truncate -s 0 $profile_filepath
+
 	if [[ $rcode -eq 0 ]]
 	then
 		exit 0
@@ -34,7 +36,6 @@ cleanup()
 
 	echo -e "\n[Error report] \n  (code: ${rcode}) > ${rmessage:-""}"
 
-	truncate -s 0 $profile_filepath
 }
 
 # trap cleanup EXIT
