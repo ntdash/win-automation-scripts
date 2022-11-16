@@ -1,6 +1,6 @@
 # Directories ####
 **/logs/**
-**/tmp/**
+**/test/**
 
 # Files ##########
 *.tmp

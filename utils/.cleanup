@@ -4,8 +4,8 @@ declare -xg rmessage="Exit unexpectedly !"
 
 cleanup()
 {
-	# $1: message
-	declare profile_filepath="${data_pathname}/.rprofile" filename="index"
+	# report_profile_filepath
+	declare profile_filepath="${tmp_pathname}/.rprofile" filename="index"
 
 	if [[ ! -f $profile_filepath ]]
 	then

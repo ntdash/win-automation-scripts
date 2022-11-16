@@ -1,11 +1,18 @@
 #! /usr/bin/env bash
 
-# data related
+# utils folder on root
 declare -x data_pathname="${root_basename}/data"
+declare -x tmp_pathname="${root_basename}/tmp"
+
+
+# current command potential data folder
 declare -x command_data_pathname="${data_pathname}/${command_name}"
 
-# subcommand related
-declare -x subcommand_name="" subcommand_pathname="${command_pathname}/subs"
+# current command potential subcommand folder
+declare -x subcommand_pathname="${command_pathname}/subs"
+
+# exported subcommand name
+declare -x subcommand_name=""
 
 # serialized parsed options
 declare -x serialized_parsed_options=""
