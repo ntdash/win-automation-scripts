@@ -2,6 +2,7 @@
 	"files.associations": {
 		"**/*.stub": "properties",
 		"**/data/**/*.conf": "properties",
+		".editor[cC]onfig": "editorconfig",
 		"**/.*": "shellscript",
 		"**/*.note": "markdown",
 	}
