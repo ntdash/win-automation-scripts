@@ -1,0 +1,15 @@
+# Important
+
+## System Design Refactor
+
+- `.profile` (for extra variable settings) `optional`
+- `.exec` (main script file) `required`
+- `.cleanup` (custom cleanup) `optional`
+
+... are present in each command and subcommand folder.
+
+Note: A not found one will result into the use of the parent one with the the first ancestor being the main file located in the utils root folder.
+
+## Config management
+
+start a watcher (docker-sleep-script) on vm_start to allow cleanup on SIGTERM sent by a system shutdown.
