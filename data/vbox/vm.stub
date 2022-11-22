@@ -2,4 +2,3 @@ state=idle
 host=:host
 user=:user
 name=:name
-w_pid=:w_pid

@@ -5,6 +5,33 @@ vboxmanage ()
 	"${vboxmanage_exec_path}" $@
 }
 
+load_available_vms_names()
+{
+	$(is_assoc_array available_vnames) && return 0
+
+	declare -xAg available_vnames=()
+
+	declare name= id=
+	while read name id
+	do
+		available_vnames[$name]="$id"
+	done <<< "$(vboxmanage list vms | sed 's/[{"\""}]//g')"
+
+}
+
+load_running_vms_names()
+{
+	$(is_assoc_array running_vnames) && return 0
+
+	declare -xAg running_vnames=()
+
+	declare name= id=
+	while read name id
+	do
+		available_vnames[$name]="$id"
+	done <<< "$(vboxmanage list runningvms | sed 's/[{"\""}]//g')"
+}
+
 
 start_vm()
 {
@@ -51,6 +78,9 @@ is_vm_running()
 }
 
 declare -xf vboxmanage
+
+declare -xf load_available_vms_names
+declare -xf load_running_vms_names
 
 declare -xf is_vm_running
 

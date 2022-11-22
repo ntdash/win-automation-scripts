@@ -10,7 +10,7 @@ then
 fi
 
 # resolve vname
-resolve_vname $vname
+resolve_vm_name $vname
 
 declare -i rcode=0
 

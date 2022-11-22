@@ -11,7 +11,7 @@ then
 fi
 
 # resolve vname
-resolve_vname $vname
+resolve_vm_name $vname
 
 # check physical state
 is_vm_running
@@ -35,8 +35,7 @@ start_vm
 if [[ $? -ne 0 ]]
 then
 	set_attr state idle
-	rmessage="Error occured while starting the virtual machine [\"${vname}\"]"
-	exit 1
+	r_quit 1 "Error occured while starting the virtual machine [\"${vname}\"]"
 fi
 
 # auto_close option

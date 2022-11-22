@@ -2,7 +2,7 @@
 
 ## System Design Refactor
 
-- `.profile` (for extra variable settings) `optional`
+- `.profile` (for extra variable settings) `optional` ... note: use for command argument parser
 - `.exec` (main script file) `required`
 - `.cleanup` (custom cleanup) `optional`
 

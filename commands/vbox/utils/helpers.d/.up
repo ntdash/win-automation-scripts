@@ -1,22 +1,10 @@
-load_available_vnames()
-{
-	$(is_assoc_array available_vnames) && return 0
-
-	declare -xAg available_vnames=()
-
-	declare name= id=
-	while read name id
-	do
-		available_vnames[$name]="$id"
-	done <<< "$(vboxmanage list vms | sed 's/[{"\""}]//g')"
-
-}
 
 
-resolve_vname()
+
+resolve_vm_name()
 {
 	# load vnames
-	load_available_vnames
+	load_available_vms_names
 
 	key_exists_in $1 "available_vnames"
 
@@ -75,5 +63,4 @@ resolve_vname()
 
 }
 
-declare -xf resolve_vname
-declare -xf load_available_vnames
+declare -xf resolve_vm_name
