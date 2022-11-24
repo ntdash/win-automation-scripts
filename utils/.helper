@@ -286,6 +286,34 @@ r_quit()
 
 }
 
+resolve_missing_file()
+{
+
+	if [[ -z $1 ]]
+	then
+		return 1
+	fi
+
+	declare filename="$(basename $1)" dir_pathname="$(dirname $1)" rmessage=
+
+	if [[ ! -d $dir_pathname ]]
+	then
+
+		mkdir -p $dir_pathname
+
+		if [[ $? -eq 0 ]]
+		then
+			echo "Missing folder: \"${dir_pathname}\" created."
+		else
+			echo "Failed to create missing folder at \"${dir_pathname}\"."
+			return 0
+		fi
+
+	fi
+
+	touch "${dir_pathname}/${filename}"
+}
+
 # cleanup functions
 declare -xf r_quit
 
@@ -303,3 +331,4 @@ declare -xf is_defined
 declare -xf is_array
 declare -xf is_assoc_array
 declare -xf key_exists_in
+declare -xf resolve_missing_file
