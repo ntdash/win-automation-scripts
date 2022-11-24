@@ -262,7 +262,7 @@ key_exists_in()
 
 r_quit()
 {
-	declare profile_filepath="${data_pathname}/.rprofile"
+	declare profile_filepath="${tmp_pathname}/.rprofile"
 
 	if [[ ! -f  $profile_filepath ]]
 	then
