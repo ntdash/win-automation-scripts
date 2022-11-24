@@ -52,10 +52,8 @@ then
 	# prevent auto_close on connection exit if (-i:interactive is) provided
 	option_key_exists 'i'
 
-
 	if [[ $? -ne 0 ]]
 	then
-
 		exit 0
 	fi
 fi
@@ -66,9 +64,8 @@ connect_to_vm
 
 rcode=$?
 
-# check if the network is still up running
-is_vm_running
 
+# resolve auto close
 if [[ $? -eq 0 ]]
 then
 
