@@ -40,7 +40,7 @@ connect_to_vm()
 	declare -i rcode=0
 
 	# ping vm ip
-	ping -n 1 -w 500 $host > /dev/null
+	ping -n 1 -w 1500 $host > /dev/null
 
 	if [[ $? -eq 0 ]]
 	then
