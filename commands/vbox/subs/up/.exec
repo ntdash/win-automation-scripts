@@ -19,8 +19,7 @@ is_vm_running
 # Warning message if already powerred
 if [[ $? -eq 0 ]]
 then
-	rmessage="Virtual machine [\"${vname}\"] already on.\nConsider:\n    - [connect] - Connecting to it through ssh\n    - [down] - Shutting it down"
-	exit 1
+	r_quit 1 "Virtual machine [\"${vname}\"] already on.\nConsider:\n    - [connect] - Connecting to it through ssh\n    - [down] - Shutting it down"
 fi
 
 # check and create if config does not exists
