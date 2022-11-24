@@ -1,7 +1,5 @@
 #! /usr/bin/env bash
 
-# vbox down [-f|null] :vname
-
 # check vname availability
 
 if [[ -z "$vname" ]]
@@ -13,7 +11,7 @@ fi
 resolve_vm_name $vname
 
 # check physical state
-vboxmanage list runningvms | grep -i $vname > /dev/null
+is_vm_running
 
 # quit if vname is not a running virtual machine
 if [[ $? -ne 0 ]]
@@ -21,8 +19,5 @@ then
 	r_quit 1 "Virtual machine [\"${vname}\"] not running."
 fi
 
-# close all all remotely related to the vm
-
-
 # close it
-vboxmanage controlvm $vname poweroff
+stop_vm
