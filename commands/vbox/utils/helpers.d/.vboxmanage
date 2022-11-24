@@ -28,7 +28,7 @@ load_running_vms_names()
 	declare name= id=
 	while read name id
 	do
-		available_vms_names[$name]="$id"
+		running_vms_names[$name]="$id"
 	done <<< "$(vboxmanage list runningvms | sed 's/[{"\""}]//g')"
 }
 
