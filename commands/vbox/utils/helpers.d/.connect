@@ -50,14 +50,14 @@ connect_to_vm()
 
 		if [[ $? -ne 0 ]]
 		then
-			r_quit 1 "Failed to connect to virtual machine: [\"${vname}\"]."
+			r_quit 1 "L2: Failed to connect to virtual machine: [\"${vname}\"]."
 		fi
 
 		echo "Closing connection to [\"${vname}\"]."
 
 	else
 		# print error message
-		r_quit 1 "Failed to connect to virtual machine: [\"${vname}\"]."
+		r_quit 1 "L1: Failed to connect to virtual machine: [\"${vname}\"]."
 	fi
 
 	return $rcode
