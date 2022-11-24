@@ -1,19 +1,17 @@
 
-
-
 resolve_vm_name()
 {
 	# load vnames
 	load_available_vms_names
 
-	key_exists_in $1 "available_vnames"
+	key_exists_in $1 "available_vms_names"
 
 	if [[ $? -ne 0 ]]
 	then
 		echo "[$1] not found in list of available virtualbox name"
 		echo "Choose among the available ones:"
 
-		declare -a name_collection="(${!available_vnames[@]})"
+		declare -a name_collection="(${!available_vms_names[@]})"
 		declare name=
 		declare -i count=0
 

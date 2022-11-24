@@ -62,7 +62,7 @@ fi
 
 declare -i rcode=0
 
-connect_vm_host
+connect_to_vm
 
 rcode=$?
 
