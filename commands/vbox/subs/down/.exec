@@ -2,10 +2,7 @@
 
 # check vname availability
 
-if [[ -z "$vname" ]]
-then
-	r_quit 1 "Missing virtual machine name"
-fi
+[[ -z "${vname}" ]] && r_quit 1 "Missing virtual machine name"
 
 # resolve vname
 resolve_vm_name $vname
