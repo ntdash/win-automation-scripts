@@ -39,26 +39,37 @@ connect_to_vm()
 
 	declare -i rcode=0
 
+	echo -e "Trying connecting through ssh with:\nHost: ${host}\nUser: ${user}\n..."
+
 	# ping vm ip
-	ping -n 1 -w 1500 $host > /dev/null
 
-	if [[ $? -eq 0 ]]
-	then
-		echo -e "Trying connecting through ssh with:\nHost: ${host}\nUser: ${user}\n..."
-		# on-success connect to it
-		ssh -l $user $host 2> /dev/null
+	declare -i duration=0 retry=5
 
-		if [[ $? -ne 0 ]]
+	while sleep $duration
+	do
+		ping -n 1 -w 500 $host > /dev/null
+
+		[[ $? -eq 0 ]] && break
+
+		if [[ $retry -le 0 ]]
 		then
-			r_quit 1 "L2: Failed to connect to virtual machine: [\"${vname}\"]."
+			r_quit 1 "Failed to reach out to virtual machine [\"${vname}\"]'s network after 5 attempt."
+			break
 		fi
 
-		echo "Closing connection to [\"${vname}\"]."
+		# increase by number a retry left
+		duration+=$retry
 
-	else
-		# print error message
-		r_quit 1 "L1: Failed to connect to virtual machine: [\"${vname}\"]."
-	fi
+		# decrease number of retry
+		retry+=-1
+	done
+
+	# on-success connect to it
+	ssh -l $user $host 2> /dev/null
+
+	[[ $? -ne 0 ]] && r_quit 1 "Failed to connect to virtual machine [\"${vname}\"]."
+
+	echo "Closing connection to [\"${vname}\"]..."
 
 	return $rcode
 }
