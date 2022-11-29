@@ -1,5 +1,7 @@
-connect_to_vm()
+retrieve_conn_params()
 {
+	[[ -n $vm_host ]] && [[ -n $vm_user ]] && return 0
+
 	# load config
 	load_vm_config
 
@@ -9,8 +11,10 @@ connect_to_vm()
 
 	for attr in ${pv_table[@]}
 	do
-		declare ${attr}="${parsed_config[$attr]}"
-		declare -n ref=$attr
+
+		# apply prefix
+		declare -g "vm_${attr}"="${parsed_config[$attr]}"
+		declare -n ref="vm_${attr}"
 
 		if [[ -z $ref ]] || [[ "${ref}" == ":${attr}" ]]
 		then
@@ -37,17 +41,17 @@ connect_to_vm()
 		save_vm_config
 	fi
 
-	declare -i rcode=0
+}
 
-	echo -e "Trying connecting through ssh with:\nHost: ${host}\nUser: ${user}\n..."
-
-	# ping vm ip
+ping_vm()
+{
+	retrieve_conn_params
 
 	declare -i duration=0 retry=5
 
 	while sleep $duration
 	do
-		ping -n 1 -w 500 $host > /dev/null
+		ping -n 1 -w 500 $vm_host > /dev/null
 
 		[[ $? -eq 0 ]] && break
 
@@ -64,14 +68,26 @@ connect_to_vm()
 		retry+=-1
 	done
 
+	return 0
+}
+
+connect_to_vm()
+{
+	retrieve_conn_params
+
+
+	echo -e "Trying connecting through ssh with:\nHost: ${vm_host}\nUser: ${vm_user}\n..."
+
+	ping_vm
+
 	# on-success connect to it
-	ssh -l $user $host 2> /dev/null
+	ssh -l $vm_user $vm_host 2> /dev/null
 
 	[[ $? -ne 0 ]] && r_quit 1 "Failed to connect to virtual machine [\"${vname}\"]."
 
 	echo "Closing connection to [\"${vname}\"]..."
-
-	return $rcode
 }
 
 declare -xf connect_to_vm
+declare -xf ping_vm
+declare -xf retrieve_conn_params

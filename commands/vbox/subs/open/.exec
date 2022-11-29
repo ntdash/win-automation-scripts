@@ -1,0 +1,31 @@
+#! /usr/bin/env bash
+
+# check vname availability
+[[ -z "${vname}" ]] && r_quit 1 "Missing virtual machine name"
+
+# resolve vname
+resolve_vm_name $vname
+
+# ping vm
+ping_vm
+
+get_option_value 'p' :rpath
+
+declare rhome="$(ssh -l $vm_user $vm_host 'echo ~')"
+
+rpath="${rhome}/${rpath#/}"
+
+# check pathname existence
+ssh -l $vm_user $vm_host "ls -1 ${rpath} 2> /dev/null" > /dev/null
+
+
+[[ $? -ne 0 ]] && r_quit 1 "vbox: open: cannot access '${rpath}'."
+
+
+# MSYS_NO_PATHCONV=1 prevent root path conversion
+MSYS_NO_PATHCONV=1 code --remote ssh-remote+"${vm_user}.${vm_host}" "$rpath"
+
+if [[ $? -ne 0 ]]
+then
+	echo "code: failed to open path in [\"${vname}\"]."
+fi
