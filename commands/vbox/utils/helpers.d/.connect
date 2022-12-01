@@ -47,7 +47,7 @@ ping_vm()
 {
 	retrieve_conn_params
 
-	declare -i duration=0 retry=5
+	declare -i duration=0 count=1 max=10
 
 	while sleep $duration
 	do
@@ -55,17 +55,17 @@ ping_vm()
 
 		[[ $? -eq 0 ]] && break
 
-		if [[ $retry -le 0 ]]
+		if [[ $count -gt $max ]]
 		then
-			r_quit 1 "Failed to reach out to virtual machine [\"${vname}\"]'s network after 5 attempt."
+			r_quit 1 "Failed to reach out to virtual machine [\"${vname}\"]'s network after ${count} attempt."
 			break
 		fi
 
 		# increase by number a retry left
-		duration+=$retry
+		duration+=$count
 
 		# decrease number of retry
-		retry+=-1
+		count+=1
 	done
 
 	return 0
@@ -75,17 +75,17 @@ connect_to_vm()
 {
 	retrieve_conn_params
 
-
 	echo -e "Trying connecting through ssh with:\nHost: ${vm_host}\nUser: ${vm_user}\n..."
 
+	# try reaching host
 	ping_vm
 
 	# on-success connect to it
 	ssh -l $vm_user $vm_host 2> /dev/null
 
-	[[ $? -ne 0 ]] && r_quit 1 "Failed to connect to virtual machine [\"${vname}\"]."
+	[[ $? -ne 0 ]] && r_quit 1 "Connection to [\"${vname}\"] stopped abruptly."
 
-	echo "Closing connection to [\"${vname}\"]..."
+	echo "Connection to [\"${vname}\"] closed."
 }
 
 declare -xf connect_to_vm
