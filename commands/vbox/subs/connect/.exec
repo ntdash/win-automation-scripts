@@ -2,12 +2,8 @@
 
 # vbox exec -[i|null] :vname [arg...]
 
-# check vname availability
-
-[[ -z "${vname}" ]] && r_quit 1 "Missing virtual machine name"
-
 # resolve vname
-resolve_vm_name $vname
+resolve_running_vm_name $vname
 
 declare -i rcode=0
 

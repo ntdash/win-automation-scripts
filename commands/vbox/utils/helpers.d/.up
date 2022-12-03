@@ -1,21 +1,51 @@
 
+resolve_available_vm_name()
+{
+	resolve_vm_name "available" $1
+}
+
+resolve_running_vm_name()
+{
+	resolve_vm_name "running" $1
+}
+
 resolve_vm_name()
 {
-	# load vnames
-	load_available_vms_names
+	vname="${2}"
+	declare head_pathname="${command_data_pathname}/HEAD"
 
-	key_exists_in $1 "available_vms_names"
+	if [[ -z "$vname" ]]
+	then
+
+		if [[ -f $head_pathname ]]
+		then
+			vname="$(cat $head_pathname)"
+		fi
+
+	fi
+
+	# load vnames
+	declare collection_name="${1}_vms_names"
+
+	declare fn_helper="load_${collection_name}"
+
+	$fn_helper
+
+	declare -n vms_collection="${collection_name}"
+
+	key_exists_in $vname $collection_name
 
 	if [[ $? -ne 0 ]]
 	then
-		echo "[$1] not found in list of available virtualbox name"
-		echo "Choose among the available ones:"
 
-		declare -a name_collection="(${!available_vms_names[@]})"
+		echo "[$2] not found in list of ${1} virtualbox name"
+		echo "Choose among the ${1} ones:"
+
+		declare -a current_collection="(${!vms_collection[@]})"
 		declare name=
 		declare -i count=0
 
-		for name in ${name_collection[@]}
+		for name in ${current_collection[@]}
 		do
 			count=$(($count + 1))
 			echo -e "    ${count}. ${name}"
@@ -56,9 +86,14 @@ resolve_vm_name()
 			r_quit 1 "Unexpected error occured."
 		fi
 
-		vname=${name_collection[$(($choice - 1))]}
+		vname=${current_collection[$(($choice - 1))]}
+
+		# save to head
+		echo $vname > $head_pathname
 	fi
 
 }
 
 declare -xf resolve_vm_name
+declare -xf resolve_running_vm_name
+declare -xf resolve_available_vm_name

@@ -1,10 +1,7 @@
 #! /usr/bin/env bash
 
-# check the presence of vnmae
-if [[ -z $vname ]]
-then
-	r_quit 1 "Missing virtualbox name."
-fi
+# resolve vname
+resolve_available_vm_name $vname
 
 # retrieve keys
 get_option_keys :keys

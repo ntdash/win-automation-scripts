@@ -1,11 +1,7 @@
 #! /usr/bin/env bash
 
-# check vname availability
-
-[[ -z "${vname}" ]] && r_quit 1 "Missing virtual machine name"
-
 # resolve vname
-resolve_vm_name $vname
+resolve_running_vm_name $vname
 
 # check physical state
 is_vm_running
