@@ -134,9 +134,7 @@ option_key_exists()
 
 get_option_keys()
 {
-   declare -a cval
-
-   cval=$(options_manager get keys)
+   declare -a cval="("$(options_manager get keys)")"
 
    bind_param cval $1 || echo $cval
 }
