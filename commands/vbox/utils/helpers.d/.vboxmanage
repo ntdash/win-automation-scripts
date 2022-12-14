@@ -2,87 +2,87 @@
 
 vboxmanage ()
 {
-	"${vboxmanage_exec_path}" $@
+   "${vboxmanage_exec_path}" $@
 }
 
 load_available_vms_names()
 {
-	$(is_assoc_array available_vms_names) && return 0
+   $(is_assoc_array available_vms_names) && return 0
 
-	declare -xAg available_vms_names=()
+   declare -xAg available_vms_names=()
 
-	declare name= id=
-	while read name id
-	do
-		if [[ -n $name ]]
-		then
-			available_vms_names[$name]="$id"
-		fi
-	done <<< "$(vboxmanage list vms | sed 's/[{"\""}]//g')"
+   declare name= id=
+   while read name id
+   do
+      if [[ -n $name ]]
+      then
+         available_vms_names[$name]="$id"
+      fi
+   done <<< "$(vboxmanage list vms | sed 's/[{"\""}]//g')"
 
 }
 
 load_running_vms_names()
 {
-	$(is_assoc_array running_vms_names) && return 0
+   $(is_assoc_array running_vms_names) && return 0
 
-	declare -xAg running_vms_names=()
+   declare -xAg running_vms_names=()
 
-	declare name= id=
-	while read name id
-	do
-		if [[ -n $name ]]
-		then
-			running_vms_names[$name]="$id"
-		fi
-	done <<< "$(vboxmanage list runningvms | sed 's/[{"\""}]//g')"
+   declare name= id=
+   while read name id
+   do
+      if [[ -n $name ]]
+      then
+         running_vms_names[$name]="$id"
+      fi
+   done <<< "$(vboxmanage list runningvms | sed 's/[{"\""}]//g')"
 }
 
 
 start_vm()
 {
-	declare -i rcode=0
+   declare -i rcode=0
 
-	vboxmanage startvm ${1:-$vname} --type headless 2> /dev/null
+   vboxmanage startvm ${1:-$vname} --type headless 2> /dev/null
 
-	rcode=$?
+   rcode=$?
 
-	if [[ $rcode -eq 0 ]]
-	then
-		set_attr state running
-		save_vm_config
-	fi
+   if [[ $rcode -eq 0 ]]
+   then
+      set_attr state running
+      save_vm_config
+   fi
 
-	return $rcode
+   return $rcode
 }
 
 stop_vm()
 {
-	echo "Closing virtual machine [\"${vname}\"]..."
+   echo "Closing virtual machine [\"${vname}\"]..."
 
-	declare -i rcode=0
+   declare -i rcode=0
 
-	vboxmanage controlvm ${1:-$vname} poweroff
+   vboxmanage controlvm ${1:-$vname} poweroff
 
-	rcode=$?
+   rcode=$?
 
-	if [[ $rcode -eq 0 ]]
-	then
-		set_attr state idle
-		save_vm_config
-	fi
+   if [[ $rcode -eq 0 ]]
+   then
+      set_attr state idle
+      save_vm_config
+   fi
 
-	return $rcode
+   return $rcode
 
 }
 
 is_vm_running()
 {
-	load_running_vms_names
+   load_running_vms_names
 
-	key_exists_in ${1:-$vname} running_vms_names
+   key_exists_in ${1:-$vname} running_vms_names
 
-	return $?
+   return $?
 }
 
 declare -xf vboxmanage

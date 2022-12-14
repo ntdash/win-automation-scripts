@@ -1,91 +1,91 @@
 retrieve_conn_params()
 {
-	[[ -n $vm_host ]] && [[ -n $vm_user ]] && return 0
+   [[ -n $vm_host ]] && [[ -n $vm_user ]] && return 0
 
-	# load config
-	load_vm_config
+   # load config
+   load_vm_config
 
-	# possible variable
-	declare -a pv_table=('user' 'host')
-	declare table_updated='false' attr=
+   # possible variable
+   declare -a pv_table=('user' 'host')
+   declare table_updated='false' attr=
 
-	for attr in ${pv_table[@]}
-	do
+   for attr in ${pv_table[@]}
+   do
 
-		# apply prefix
-		declare -g "vm_${attr}"="${parsed_config[$attr]}"
-		declare -n ref="vm_${attr}"
+      # apply prefix
+      declare -g "vm_${attr}"="${parsed_config[$attr]}"
+      declare -n ref="vm_${attr}"
 
-		if [[ -z $ref ]] || [[ "${ref}" == ":${attr}" ]]
-		then
-			echo "Attribute [\"$attr\"] not defined. Will you want to define one ? [Y/n]"
+      if [[ -z $ref ]] || [[ "${ref}" == ":${attr}" ]]
+      then
+         echo "Attribute [\"$attr\"] not defined. Will you want to define one ? [Y/n]"
 
-			declare choice='y'
-			read -p '> ' choice
+         declare choice='y'
+         read -p '> ' choice
 
-			choice=${choice:-'y'}
+         choice=${choice:-'y'}
 
-			if [[ ! "${choice}" =~ [yY] ]]
-			then
-				r_quit 1 "Aborting..."
-			fi
+         if [[ ! "${choice}" =~ [yY] ]]
+         then
+            r_quit 1 "Aborting..."
+         fi
 
-			ref=${choice}
-			table_updated="true"
-		fi
-	done
+         ref=${choice}
+         table_updated="true"
+      fi
+   done
 
-	# persit any change
-	if [[ "${table_updated}" == "true" ]]
-	then
-		save_vm_config
-	fi
+   # persit any change
+   if [[ "${table_updated}" == "true" ]]
+   then
+      save_vm_config
+   fi
 
 }
 
 ping_vm()
 {
-	retrieve_conn_params
+   retrieve_conn_params
 
-	declare -i duration=0 count=1 max=10
+   declare -i duration=0 count=1 max=10
 
-	while sleep $duration
-	do
-		ping -n 1 -w 500 $vm_host > /dev/null
+   while sleep $duration
+   do
+      ping -n 1 -w 500 $vm_host > /dev/null
 
-		[[ $? -eq 0 ]] && break
+      [[ $? -eq 0 ]] && break
 
-		if [[ $count -gt $max ]]
-		then
-			r_quit 1 "Failed to reach out to virtual machine [\"${vname}\"]'s network after ${count} attempt."
-			break
-		fi
+      if [[ $count -gt $max ]]
+      then
+         r_quit 1 "Failed to reach out to virtual machine [\"${vname}\"]'s network after ${count} attempt."
+         break
+      fi
 
-		# increase by number a retry left
-		duration+=$count
+      # increase by number a retry left
+      duration+=$count
 
-		# decrease number of retry
-		count+=1
-	done
+      # decrease number of retry
+      count+=1
+   done
 
-	return 0
+   return 0
 }
 
 connect_to_vm()
 {
-	retrieve_conn_params
+   retrieve_conn_params
 
-	echo -e "Trying connecting through ssh with:\nHost: ${vm_host}\nUser: ${vm_user}\n..."
+   echo -e "Trying connecting through ssh with:\nHost: ${vm_host}\nUser: ${vm_user}\n..."
 
-	# try reaching host
-	ping_vm
+   # try reaching host
+   ping_vm
 
-	# on-success connect to it
-	ssh -l $vm_user $vm_host 2> /dev/null
+   # on-success connect to it
+   ssh -l $vm_user $vm_host 2> /dev/null
 
-	[[ $? -ne 0 ]] && r_quit 1 "Connection to [\"${vname}\"] stopped abruptly."
+   [[ $? -ne 0 ]] && r_quit 1 "Connection to [\"${vname}\"] stopped abruptly."
 
-	echo "Connection to [\"${vname}\"] closed."
+   echo "Connection to [\"${vname}\"] closed."
 }
 
 declare -xf connect_to_vm

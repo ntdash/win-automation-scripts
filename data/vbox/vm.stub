@@ -2,3 +2,4 @@ state=idle
 host=:host
 user=:user
 name=:name
+previous=:previous

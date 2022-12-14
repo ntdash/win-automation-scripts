@@ -6,16 +6,16 @@ get_option_keys :keys
 
 if [[ ${#keys[@]} -gt 1 ]]
 then
-	r_quit 1 "No more than one option expected."
+   r_quit 1 "No more than one option expected."
 fi
 
 declare key=${keys[0]} command_suite="vms"
 
 
 case $key in
-	r)
-		command_suite="runningvms"
-	;;
+   r)
+      command_suite="runningvms"
+   ;;
 esac
 
 vboxmanage list $command_suite

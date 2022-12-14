@@ -9,7 +9,7 @@ is_vm_running
 # quit if vname is not a running virtual machine
 if [[ $? -ne 0 ]]
 then
-	r_quit 1 "Virtual machine [\"${vname}\"] not running."
+   r_quit 1 "Virtual machine [\"${vname}\"] not running."
 fi
 
 # close it

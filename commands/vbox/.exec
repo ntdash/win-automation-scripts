@@ -21,9 +21,9 @@ sed_substitution='\1:\2'
 # if retrieval succed then procced on retrieving subcommand-name and its options
 if [[ "$*" != "${possible_vname}" ]]
 then
-	# pattern expecting a vname therefore limited at the end by the vname
-	sed_pattern+="[[:space:]]:"${possible_vname}"\$"
-	declare vname="${possible_vname}"
+   # pattern expecting a vname therefore limited at the end by the vname
+   sed_pattern+="[[:space:]]:"${possible_vname}"\$"
+   declare vname="${possible_vname}"
 fi
 
 sed_result=$(echo "$*" | sed -r  "s/${sed_pattern}/${sed_substitution}/")
@@ -35,17 +35,17 @@ declare IFS=
 
 if [[ -z "${subcommand_name}" ]]
 then
-	r_quit 1 "${command_name}: ${subcommand_name} not found"
+   r_quit 1 "${command_name}: ${subcommand_name} not found"
 fi
 
 # resolve [--] short hand
 if [[ "${subcommand_name}" == "--" ]]
 then
-	subcommand_name="raw"
-	options="-q -- ${options} ${vname}"
+   subcommand_name="raw"
+   options="-q -- ${options} ${vname}"
 else
-	# export vname
-	declare -x vname
+   # export vname
+   declare -x vname
 fi
 
 # convert options into array
@@ -61,13 +61,13 @@ declare subcommand_exec_filepath="${resolved_path}/.exec"
 # throw error if no exec file is found
 if [[ ! -f $subcommand_exec_filepath ]]
 then
-	r_quit 127 "${subcommand_name} exec file not found at: \"${subcommand_exec_filepath}\""
+   r_quit 127 "${subcommand_name} exec file not found at: \"${subcommand_exec_filepath}\""
 fi
 
 # parse options if provided
 if [[ ${#options} -gt 0 ]]
 then
-	options_parser ${options[@]}
+   options_parser ${options[@]}
 fi
 
 # export sub_command_path

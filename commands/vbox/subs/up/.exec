@@ -11,7 +11,7 @@ is_vm_running
 # Warning message if already powerred
 if [[ $? -eq 0 ]]
 then
-	r_quit 1 "Virtual machine [\"${vname}\"] already on.\n  Consider:\n    - [connect] - Connecting to it through ssh\n    - [down] - Shutting it down"
+   r_quit 1 "Virtual machine [\"${vname}\"] already on.\n  Consider:\n    - [connect] - Connecting to it through ssh\n    - [down] - Shutting it down"
 fi
 
 # check and create if config does not exists
@@ -25,8 +25,8 @@ start_vm
 
 if [[ $? -ne 0 ]]
 then
-	set_attr state idle
-	r_quit 1 "Error occured while starting the virtual machine [\"${vname}\"]"
+   set_attr state idle
+   r_quit 1 "Error occured while starting the virtual machine [\"${vname}\"]"
 fi
 
 # auto_close option
@@ -38,15 +38,15 @@ option_key_exists 'd'
 if [[ $? -eq 0 ]]
 then
 
-	auto_close="false"
+   auto_close="false"
 
-	# prevent auto_close on connection exit if (-i:interactive is) provided
-	option_key_exists 'i'
+   # prevent auto_close on connection exit if (-i:interactive is) provided
+   option_key_exists 'i'
 
-	if [[ $? -ne 0 ]]
-	then
-		exit 0
-	fi
+   if [[ $? -ne 0 ]]
+   then
+      exit 0
+   fi
 fi
 
 declare -i rcode=0
@@ -60,11 +60,11 @@ rcode=$?
 if [[ $? -eq 0 ]]
 then
 
-	if [[ "${auto_close}" == "true" ]]
-	then
+   if [[ "${auto_close}" == "true" ]]
+   then
 
-		stop_vm
-	fi
+      stop_vm
+   fi
 fi
 
 exit $rcode

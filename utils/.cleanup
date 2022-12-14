@@ -4,37 +4,37 @@ declare -xg rmessage="Exit unexpectedly !"
 
 cleanup()
 {
-	# report_profile_filepath
-	declare profile_filepath="${tmp_pathname}/.rprofile" filename="index"
+   # report_profile_filepath
+   declare profile_filepath="${tmp_pathname}/.rprofile" filename="index"
 
-	if [[ ! -f $profile_filepath ]]
-	then
-		echo $rmessage;
-		exit 1;
-	fi
+   if [[ ! -f $profile_filepath ]]
+   then
+      echo $rmessage;
+      exit 1;
+   fi
 
-	# source the file
-	source $profile_filepath
+   # source the file
+   source $profile_filepath
 
-	truncate -s 0 $profile_filepath
+   truncate -s 0 $profile_filepath
 
-	if [[ $rcode -eq 0 ]]
-	then
-		exit 0
-	fi
+   if [[ $rcode -eq 0 ]]
+   then
+      exit 0
+   fi
 
-	# check for subcommand_name
+   # check for subcommand_name
 
-	if [[ -n "$subcommand_name" ]]
-	then
-		filename="${subcommand_name}"
-	fi
+   if [[ -n "$subcommand_name" ]]
+   then
+      filename="${subcommand_name}"
+   fi
 
-	declare man_filepath="${command_pathname}/man/${filename}"
+   declare man_filepath="${command_pathname}/man/${filename}"
 
-	cat $man_filepath
+   cat $man_filepath
 
-	echo -e "\n[Error report] \n  (code: ${rcode}) > ${rmessage:-""}"
+   echo -e "\n[Error report] \n  (code: ${rcode}) > ${rmessage:-""}"
 
 }
 

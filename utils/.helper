@@ -3,242 +3,242 @@
 # check if value is defined
 is_defined()
 {
-	declare -p $1 &> /dev/null
+   declare -p $1 &> /dev/null
 
-	return $?
+   return $?
 }
 
 # check if value is array
 is_array()
 {
-	declare patttern="^declare -[aA]"
+   declare patttern="^declare -[aA]"
 
-	[[ "$(declare -p ${1} 2> /dev/null)" =~ $patttern ]]
+   [[ "$(declare -p ${1} 2> /dev/null)" =~ $patttern ]]
 
-	return $?
+   return $?
 }
 
 # check if variable is associative array
 is_assoc_array()
 {
-	declare patttern="^declare -A"
+   declare patttern="^declare -A"
 
-	[[ "$(declare -p ${1} 2> /dev/null)" =~ $patttern ]]
+   [[ "$(declare -p ${1} 2> /dev/null)" =~ $patttern ]]
 
-	return $?
+   return $?
 }
 
 # $1 = value-param-name:binding-param-name
 bind_param()
 {
-	if [[ $# -ne 2 ]] || [[ ! "$2" =~ ^:.+ ]]
-	then
-		return 1
-	fi
+   if [[ $# -ne 2 ]] || [[ ! "$2" =~ ^:.+ ]]
+   then
+      return 1
+   fi
 
-	# value-param && binding-param
-	declare b_param=${2:1} v_param=$1 v_type value result
+   # value-param && binding-param
+   declare b_param=${2:1} v_param=$1 v_type value result
 
-	result=$(declare -p ${v_param} | sed -r "s/^declare -(.+) ${v_param}=(.+)$/\1:\2/" )
+   result=$(declare -p ${v_param} | sed -r "s/^declare -(.+) ${v_param}=(.+)$/\1:\2/" )
 
-	declare IFS=':'
-	read v_type value <<< $result
-	IFS=
+   declare IFS=':'
+   read v_type value <<< $result
+   IFS=
 
-	if [[ "$v_type" == "-" ]]
-	then
-		v_type=""
-		value=$( echo ${value} | sed 's/"//g' )
-	fi
+   if [[ "$v_type" == "-" ]]
+   then
+      v_type=""
+      value=$( echo ${value} | sed 's/"//g' )
+   fi
 
-	declare -${v_type}g $b_param=$value
+   declare -${v_type}g $b_param=$value
 }
 
 options_manager()
 {
-	declare -A collection="$serialized_parsed_options"
+   declare -A collection="$serialized_parsed_options"
 
-	# throw error if collection not defined
-	# echo "Failed to retrieve parsed option's collection."
-	! is_assoc_array collection && return 1
+   # throw error if collection not defined
+   # echo "Failed to retrieve parsed option's collection."
+   ! is_assoc_array collection && return 1
 
-	# declare local returners
-	declare -i rcode=0
-	declare rvalue=
+   # declare local returners
+   declare -i rcode=0
+   declare rvalue=
 
-	case $1 in
+   case $1 in
 
-		"get")
-			# $2 = key
-			case $2 in
+      "get")
+         # $2 = key
+         case $2 in
 
-				"keys")
-					rvalue=${!collection[@]}
-				;;
+            "keys")
+               rvalue=${!collection[@]}
+            ;;
 
-				# error_message="Failed to retrieve value of option:\"${3}\"."
-				"value")
-					rvalue=${collection[$3]}
+            # error_message="Failed to retrieve value of option:\"${3}\"."
+            "value")
+               rvalue=${collection[$3]}
 
-					[[ -z $rvalue ]] && rcode=2 || rcode=0
-				;;
+               [[ -z $rvalue ]] && rcode=2 || rcode=0
+            ;;
 
-				# error_message="Failed to retrieve \"${2}\"."
-				*)
-					rcode=1
-				;;
-			esac
-		;;
+            # error_message="Failed to retrieve \"${2}\"."
+            *)
+               rcode=1
+            ;;
+         esac
+      ;;
 
-		"check")
+      "check")
 
-			key_exists_in $2 'collection' && rcode=0 || rcode=1
-		;;
+         key_exists_in $2 'collection' && rcode=0 || rcode=1
+      ;;
 
-		# echo "Failed to proccess \"${1}\""
-		*)
-			rcode=1
-		;;
-	esac
+      # echo "Failed to proccess \"${1}\""
+      *)
+         rcode=1
+      ;;
+   esac
 
 
-	if [[ $rcode -eq 0 ]]
-	then
-		echo $rvalue
-	fi
+   if [[ $rcode -eq 0 ]]
+   then
+      echo $rvalue
+   fi
 
-	return $rcode
+   return $rcode
 }
 
 
 get_option_value()
 {
-	declare cval
+   declare cval
 
-	cval=$(options_manager get value $1)
+   cval=$(options_manager get value $1)
 
-	if [[ $? -ne 0 ]]
-	then
-		return 1
-	fi
+   if [[ $? -ne 0 ]]
+   then
+      return 1
+   fi
 
-	bind_param cval $2 || echo $cval
+   bind_param cval $2 || echo $cval
 }
 
 option_key_exists()
 {
-	options_manager check $1 > /dev/null
+   options_manager check $1 > /dev/null
 
-	return $?
+   return $?
 }
 
 get_option_keys()
 {
-	declare -a cval
+   declare -a cval
 
-	cval=$(options_manager get keys)
+   cval=$(options_manager get keys)
 
-	bind_param cval $1 || echo $cval
+   bind_param cval $1 || echo $cval
 }
 
 options_parser()
 {
-	declare -A collection
+   declare -A collection
 
-	# check options format
-	if [[ ! "${1}" =~ ^-(-?)(.+) ]]
-	then
-		echo "Given options \"${@}\" does not satisfy the expected format"
-		exit 1
-	fi
+   # check options format
+   if [[ ! "${1}" =~ ^-(-?)(.+) ]]
+   then
+      echo "Given options \"${@}\" does not satisfy the expected format"
+      exit 1
+   fi
 
-	declare ckey entry collector
+   declare ckey entry collector
 
-	declare argv="$@"
+   declare argv="$@"
 
-	declare IFS=
-	while read entry
-	do
-		# shift the retrieved params
-		shift
+   declare IFS=
+   while read entry
+   do
+      # shift the retrieved params
+      shift
 
-		if [[ -z $entry ]]
-		then
-			continue
-		fi
+      if [[ -z $entry ]]
+      then
+         continue
+      fi
 
-		# collector announcer
-		if [[ "${entry}" == "--" ]]
-		then
+      # collector announcer
+      if [[ "${entry}" == "--" ]]
+      then
 
-			if [[ -n $ckey ]]
-			then
-				collector=true
-				break
-			else
-				echo "Format invalid for: $argv"
-				exit 1
-			fi
-		fi
+         if [[ -n $ckey ]]
+         then
+            collector=true
+            break
+         else
+            echo "Format invalid for: $argv"
+            exit 1
+         fi
+      fi
 
-		# check if current entry is a key
-		if [[ "${entry}" =~ ^-(-?)(.+) ]]
-		then
+      # check if current entry is a key
+      if [[ "${entry}" =~ ^-(-?)(.+) ]]
+      then
 
-			# check if current key is a shorthand
-			if [[ -z ${BASH_REMATCH[1]} ]]
-			then
+         # check if current key is a shorthand
+         if [[ -z ${BASH_REMATCH[1]} ]]
+         then
 
-				declare -a list="($(echo ${BASH_REMATCH[2]} | grep -o .))"
+            declare -a list="($(echo ${BASH_REMATCH[2]} | grep -o .))"
 
-				if [[ ${#list[@]} -gt 1 ]]
-				then
-					# loop current value
-					declare k
+            if [[ ${#list[@]} -gt 1 ]]
+            then
+               # loop current value
+               declare k
 
-					for k in ${list[@]}
-					do
-						# init
-						collection[$k]=
-					done
+               for k in ${list[@]}
+               do
+                  # init
+                  collection[$k]=
+               done
 
-					# keep last value
-					ckey="${k}"
+               # keep last value
+               ckey="${k}"
 
-					# skip
-					continue;
+               # skip
+               continue;
 
-				else
-					# sole shorthand
-					ckey="${list[0]}"
-				fi
+            else
+               # sole shorthand
+               ckey="${list[0]}"
+            fi
 
-			else
-				# long hand
-				ckey="${BASH_REMATCH[2]}"
-			fi
+         else
+            # long hand
+            ckey="${BASH_REMATCH[2]}"
+         fi
 
-			# init
-			collection[$ckey]=
+         # init
+         collection[$ckey]=
 
-			# skip
-			continue;
+         # skip
+         continue;
 
-		fi
+      fi
 
-		# add value to last registered key
-		collection[$ckey]+=" ${entry} "
+      # add value to last registered key
+      collection[$ckey]+=" ${entry} "
 
-	done <<< "$(echo $@ | sed 's/\s/\n/g')"
+   done <<< "$(echo $@ | sed 's/\s/\n/g')"
 
-	# concat all remaining args into current key [ckey] value
-	if [[ "$collector" == "true" ]] && [[ $# -gt 0 ]]
-	then
-		collection[$ckey]+=" ${@} "
-	fi
+   # concat all remaining args into current key [ckey] value
+   if [[ "$collector" == "true" ]] && [[ $# -gt 0 ]]
+   then
+      collection[$ckey]+=" ${@} "
+   fi
 
-	# serialize associative array
-	serialized_parsed_options="$(declare -p collection | sed -r 's/^declare -[aA] collection=(.*)$/\1/')"
+   # serialize associative array
+   serialized_parsed_options="$(declare -p collection | sed -r 's/^declare -[aA] collection=(.*)$/\1/')"
 }
 
 
@@ -247,71 +247,71 @@ options_parser()
 # error_message "Missing one of the two required params"
 key_exists_in()
 {
-	if [[ -z "$1" ]] || [[ -z "$2" ]]
-	then
-		return 1
-	fi
+   if [[ -z "$1" ]] || [[ -z "$2" ]]
+   then
+      return 1
+   fi
 
-	! $( is_assoc_array $2 ) && return 1
+   ! $( is_assoc_array $2 ) && return 1
 
-	declare -p $2 | grep -oE '\['$1'\]' > /dev/null
+   declare -p $2 | grep -oE '\['$1'\]' > /dev/null
 
-	return $?
+   return $?
 
 }
 
 r_quit()
 {
-	declare profile_filepath="${tmp_pathname}/.rprofile"
+   declare profile_filepath="${tmp_pathname}/.rprofile"
 
-	if [[ ! -f  $profile_filepath ]]
-	then
-		exit 1
-	fi
+   if [[ ! -f  $profile_filepath ]]
+   then
+      exit 1
+   fi
 
-	truncate -s 0 $profile_filepath
+   truncate -s 0 $profile_filepath
 
-	declare -i rcode=${1:-'1'}
+   declare -i rcode=${1:-'1'}
 
-	declare rmessage=$2  entry=
+   declare rmessage=$2  entry=
 
-	declare -a possible_var=('subcommand_name' 'rcode' 'rmessage')
+   declare -a possible_var=('subcommand_name' 'rcode' 'rmessage')
 
-	for entry in ${possible_var[@]}
-	do
-		declare -p $entry 2> /dev/null >> $profile_filepath
-	done
+   for entry in ${possible_var[@]}
+   do
+      declare -p $entry 2> /dev/null >> $profile_filepath
+   done
 
-	exit $rcode
+   exit $rcode
 
 }
 
 resolve_missing_file()
 {
 
-	if [[ -z $1 ]]
-	then
-		return 1
-	fi
+   if [[ -z $1 ]]
+   then
+      return 1
+   fi
 
-	declare filename="$(basename $1)" dir_pathname="$(dirname $1)" rmessage=
+   declare filename="$(basename $1)" dir_pathname="$(dirname $1)" rmessage=
 
-	if [[ ! -d $dir_pathname ]]
-	then
+   if [[ ! -d $dir_pathname ]]
+   then
 
-		mkdir -p $dir_pathname
+      mkdir -p $dir_pathname
 
-		if [[ $? -eq 0 ]]
-		then
-			echo "Missing folder: \"${dir_pathname}\" created."
-		else
-			echo "Failed to create missing folder at \"${dir_pathname}\"."
-			return 0
-		fi
+      if [[ $? -eq 0 ]]
+      then
+         echo "Missing folder: \"${dir_pathname}\" created."
+      else
+         echo "Failed to create missing folder at \"${dir_pathname}\"."
+         return 0
+      fi
 
-	fi
+   fi
 
-	touch "${dir_pathname}/${filename}"
+   touch "${dir_pathname}/${filename}"
 }
 
 # cleanup functions

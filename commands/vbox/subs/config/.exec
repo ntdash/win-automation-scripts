@@ -9,7 +9,7 @@ get_option_keys :keys
 # no combo is expected so, any number higher than 1 corresponding to the length of list of keys will result to an early exit.
 if [[ ${#keys[@]} -ne 1 ]]
 then
-	r_quit 1 "No more than one option expected."
+   r_quit 1 "No more than one option expected."
 fi
 
 # set option
@@ -21,45 +21,45 @@ echo $option | grep -Ei '^(list|get|update|create)$' > /dev/null
 if [[ $? -ne 0 ]]
 then
 
-	declare prefix=
+   declare prefix=
 
-	[[ ${#option} -gt 1 ]] && prefix='--' || prefix='-'
+   [[ ${#option} -gt 1 ]] && prefix='--' || prefix='-'
 
-	r_quit 1 "Unexpected option: \"${prefix}${option}\" given."
+   r_quit 1 "Unexpected option: \"${prefix}${option}\" given."
 fi
 
 
 case $option in
 
-	create)
+   create)
 
-		create_vm_config
-	;;
+      create_vm_config
+   ;;
 
-	*)
-		case $option in
-			list)
+   *)
+      case $option in
+         list)
 
-				list_attrs
-			;;
-			get)
+            list_attrs
+         ;;
+         get)
 
-				get_option_value get :param
-				get_attr $param
-			;;
-			update)
+            get_option_value get :param
+            get_attr $param
+         ;;
+         update)
 
-				get_option_value update :params
+            get_option_value update :params
 
-				declare IFS='='
-				declare -a attrs="("$(echo $params)")"
+            declare IFS='='
+            declare -a attrs="("$(echo $params)")"
 
-				set_attrs ${attrs[@]}
+            set_attrs ${attrs[@]}
 
-				save_vm_config
-			;;
-		esac
-	;;
+            save_vm_config
+         ;;
+      esac
+   ;;
 esac
 
 exit 0

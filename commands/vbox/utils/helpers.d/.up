@@ -1,96 +1,96 @@
 
 resolve_available_vm_name()
 {
-	resolve_vm_name "available" $1
+   resolve_vm_name "available" $1
 }
 
 resolve_running_vm_name()
 {
-	resolve_vm_name "running" $1
+   resolve_vm_name "running" $1
 }
 
 resolve_vm_name()
 {
-	vname="${2}"
-	declare head_pathname="${command_data_pathname}/HEAD"
+   vname="${2}"
+   declare head_pathname="${command_data_pathname}/HEAD"
 
-	if [[ -z "$vname" ]]
-	then
+   if [[ -z "$vname" ]]
+   then
 
-		if [[ -f $head_pathname ]]
-		then
-			vname="$(cat $head_pathname)"
-		fi
+      if [[ -f $head_pathname ]]
+      then
+         vname="$(cat $head_pathname)"
+      fi
 
-	fi
+   fi
 
-	# load vnames
-	declare collection_name="${1}_vms_names"
+   # load vnames
+   declare collection_name="${1}_vms_names"
 
-	declare fn_helper="load_${collection_name}"
+   declare fn_helper="load_${collection_name}"
 
-	$fn_helper
+   $fn_helper
 
-	declare -n vms_collection="${collection_name}"
+   declare -n vms_collection="${collection_name}"
 
-	key_exists_in $vname $collection_name
+   key_exists_in $vname $collection_name
 
-	if [[ $? -ne 0 ]]
-	then
+   if [[ $? -ne 0 ]]
+   then
 
-		echo "[$2] not found in list of ${1} virtualbox name"
-		echo "Choose among the ${1} ones:"
+      echo "[$2] not found in list of ${1} virtualbox name"
+      echo "Choose among the ${1} ones:"
 
-		declare -a current_collection="(${!vms_collection[@]})"
-		declare name=
-		declare -i count=0
+      declare -a current_collection="(${!vms_collection[@]})"
+      declare name=
+      declare -i count=0
 
-		for name in ${current_collection[@]}
-		do
-			count=$(($count + 1))
-			echo -e "    ${count}. ${name}"
-		done
+      for name in ${current_collection[@]}
+      do
+         count=$(($count + 1))
+         echo -e "    ${count}. ${name}"
+      done
 
 
-		# read -p "Choose corresponding number: " choice
-		echo "Choose a corresponding number or \"q\" to abort the operation..."
-		declare choice= resolved=
+      # read -p "Choose corresponding number: " choice
+      echo "Choose a corresponding number or \"q\" to abort the operation..."
+      declare choice= resolved=
 
-		while read -p "> " choice
-		do
-			if [[ "${choice}" == "q" ]] || [[ "${choice}" == "Q" ]]
-			then
-				r_quit 0 "Aborting..."
-			fi
+      while read -p "> " choice
+      do
+         if [[ "${choice}" == "q" ]] || [[ "${choice}" == "Q" ]]
+         then
+            r_quit 0 "Aborting..."
+         fi
 
-			declare -i parsed_choice="${choice}"
+         declare -i parsed_choice="${choice}"
 
-			if [[ "${choice}" == "0" ]] || [[ $parsed_choice -lt 0 ]] || [[ $parsed_choice -gt $count ]]
-			then
-				echo "Out of range"
-				continue
-			fi
+         if [[ "${choice}" == "0" ]] || [[ $parsed_choice -lt 0 ]] || [[ $parsed_choice -gt $count ]]
+         then
+            echo "Out of range"
+            continue
+         fi
 
-			if [[ $parsed_choice -eq 0 ]]
-			then
-				echo "Not a number"
-				continue
-			fi
+         if [[ $parsed_choice -eq 0 ]]
+         then
+            echo "Not a number"
+            continue
+         fi
 
-			resolved="true"
-			break
-		done
+         resolved="true"
+         break
+      done
 
-		if [[ -z "$resolved" ]]
-		then
-			r_quit 1 "Unexpected error occured."
-		fi
+      if [[ -z "$resolved" ]]
+      then
+         r_quit 1 "Unexpected error occured."
+      fi
 
-		vname=${current_collection[$(($choice - 1))]}
+      vname=${current_collection[$(($choice - 1))]}
 
-		# save to head
-		echo $vname > $head_pathname
-	fi
+      # save to head
+      echo $vname > $head_pathname
+   fi
 
 }
 
