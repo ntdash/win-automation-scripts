@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 
+
 # resolve vname
 resolve_running_vm_name $vname
 
@@ -20,7 +21,7 @@ ssh -l $vm_user $vm_host "ls -1 ${rpath} 2> /dev/null" > /dev/null
 
 
 # MSYS_NO_PATHCONV=1 prevent root path conversion
-MSYS_NO_PATHCONV=1 code --remote ssh-remote+"${vm_user}.${vm_host}" "$rpath"
+code --remote ssh-remote+"${vm_user}.${vm_host}" "$rpath"
 
 if [[ $? -ne 0 ]]
 then

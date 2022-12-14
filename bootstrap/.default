@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
 
+# MSYS_NO_PATHCONV=1 prevent root path conversion
+declare -xig MSYS_NO_PATHCONV=1
+
 # sed pattern
 declare asking_help_reg_pattern='^(.*) -(-help|h)$'
 declare -xg asking_help="false"

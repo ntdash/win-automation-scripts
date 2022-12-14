@@ -2,4 +2,5 @@ state=idle
 host=:host
 user=:user
 name=:name
-previous=:previous
+shell=/usr/bin/bash
+previous_workdir=:previous
