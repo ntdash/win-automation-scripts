@@ -43,6 +43,40 @@ retrieve_conn_params()
 
 }
 
+resolve_workdir()
+{
+   # resolve workdir
+   option_key_exists w
+
+   if [[ $? -eq 0 ]]
+   then
+
+      # try retrieving workdir value from parsed options array
+      get_option_value w :workdir
+
+      # try retrieving workdir value from previous one saved in config data file
+      [[ -z "${workdir}" ]] && get_attr 'previous_workdir' :workdir
+
+      # try retrieving workdir value from user prompt
+      if [[ -z "${workdir}" ]] || [[ "${workdir}" = "-" ]]
+      then
+
+         echo "Enter a valid path: "
+         read -p '> ' workdir
+
+         if [[ -z "${workdir}" ]]
+         then
+
+            workdir=
+
+            echo 'No path provided'
+            echo 'Falling back to current user home directory.'
+         fi
+      fi
+   fi
+}
+
+
 ping_vm()
 {
    retrieve_conn_params
@@ -75,19 +109,30 @@ connect_to_vm()
 {
    retrieve_conn_params
 
-   echo -e "Trying connecting through ssh with:\nHost: ${vm_host}\nUser: ${vm_user}\n..."
+   # resolve workdir
+   resolve_workdir
+
+   echo -e "Trying connecting through ssh with:\nHost: ${vm_host}\nUser: ${vm_user}\nWorkdir: ${workdir:-"~"}\n..."
 
    # try reaching host
    ping_vm
 
+   # retrieve vm shell
+   get_attr 'shell' :vm_shell
+
+   [[ -z "${vm_shell}" ]]  && r_quit 1 "vbox: connect: Failed to retrieve \"shell\" attribute from config current VM config file."
+
+   declare ssh_command="cd ${workdir}; ${vm_shell} -l"
+
    # on-success connect to it
-   ssh -l $vm_user $vm_host 2> /dev/null
+   ssh -l $vm_user $vm_host -t $ssh_command 2> /dev/null
 
    [[ $? -ne 0 ]] && r_quit 1 "Connection to [\"${vname}\"] stopped abruptly."
 
    echo "Connection to [\"${vname}\"] closed."
 }
 
-declare -xf connect_to_vm
 declare -xf ping_vm
+declare -xf connect_to_vm
+declare -xf resolve_workdir
 declare -xf retrieve_conn_params
