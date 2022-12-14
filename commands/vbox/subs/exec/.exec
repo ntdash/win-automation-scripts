@@ -1,0 +1,29 @@
+# exec -c command :vname => exec
+# exec -w path -i :vname => login
+# exec -w path -o :vname => open
+
+# resolve vname
+resolve_running_vm_name $vname
+
+get_option_keys :exec_keys
+
+declare opt=
+
+declare -i id=0
+
+for id in {0..1}
+do
+   opt=${exec_keys[$id]}
+
+   [[ "${opt}" == "w" ]] && continue
+
+
+   case $opt in
+      c) x_command ;;
+      i) x_login ;;
+      o) x_open ;;
+      *) r_quit 1 "vbox: exec: Option \"-${opt}\" not expected." ;;
+   esac
+done
+
+exit 0

@@ -3,4 +3,4 @@ host=:host
 user=:user
 name=:name
 shell=/usr/bin/bash
-previous_workdir=:previous
+workdir=:workdir

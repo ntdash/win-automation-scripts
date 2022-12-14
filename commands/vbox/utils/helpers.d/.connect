@@ -55,10 +55,10 @@ resolve_workdir()
       get_option_value w :workdir
 
       # try retrieving workdir value from previous one saved in config data file
-      [[ -z "${workdir}" ]] && get_attr 'previous_workdir' :workdir
+      [[ -z "${workdir}" ]] && get_attr 'workdir' :workdir
 
       # try retrieving workdir value from user prompt
-      if [[ -z "${workdir}" ]] || [[ "${workdir}" = "-" ]]
+      if [[ -z "${workdir}" ]] || [[ "${workdir}" == "-" ]]
       then
 
          echo "Enter a valid path: "
@@ -66,8 +66,6 @@ resolve_workdir()
 
          if [[ -z "${workdir}" ]]
          then
-
-            workdir=
 
             echo 'No path provided'
             echo 'Falling back to current user home directory.'
@@ -125,7 +123,7 @@ connect_to_vm()
    declare ssh_command="cd ${workdir}; ${vm_shell} -l"
 
    # on-success connect to it
-   ssh -l $vm_user $vm_host -t $ssh_command 2> /dev/null
+   ssh -ql $vm_user $vm_host -t $ssh_command 2> /dev/null
 
    [[ $? -ne 0 ]] && r_quit 1 "Connection to [\"${vname}\"] stopped abruptly."
 
