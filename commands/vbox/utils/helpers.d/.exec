@@ -5,15 +5,17 @@ x_open()
 
    resolve_workdir
 
-   # check pathname existence
-   ssh -ql $vm_user $vm_host "ls -1 ${workdir} 2> /dev/null" > /dev/null
 
-   [[ $? -ne 0 ]] && r_quit 1 "vbox: exec: cannot access '${workdir}'."
 
    declare rhome="$(ssh -l ${vm_user} ${vm_host} 'cd ~ && pwd')"
 
    # resolve slash prefix
-   workdir="${rhome}/${workdir}"
+   [[ "${workdir}" =~ ^/ ]] || workdir="${rhome}/${workdir}"
+
+   # check pathname existence
+   ssh -ql $vm_user $vm_host "ls -1 ${workdir} 2> /dev/null" > /dev/null
+
+   [[ $? -ne 0 ]] && r_quit 1 "vbox: exec: cannot access '${workdir}'."
 
    code --remote ssh-remote+"${vm_user}.${vm_host}" "${workdir}"
 
