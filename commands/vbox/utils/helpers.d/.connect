@@ -43,6 +43,26 @@ retrieve_conn_params()
 
 }
 
+check_workdir()
+{
+   declare rhome= path_type=
+
+   rhome="$(ssh -ql ${vm_user} ${vm_host} 'cd ~ && pwd')"
+
+   # resolve slash prefix
+   [[ "${workdir}" =~ ^/ ]] || workdir="${rhome}/${workdir:-'.'}"
+
+   # check pathname existence
+   declare ssh_command="ls -ld ${workdir} 2> /dev/null"
+
+   path_type="$(ssh -ql $vm_user $vm_host $ssh_command |  awk -F '' '{print $1}')"
+
+   [[ $? -ne 0 ]] && r_quit 1 "vbox: exec: cannot access '${workdir}'."
+
+   bind_param path_type $1
+}
+
+# resolve_workdir contain `check_workdir` function that assume that vname is connectable
 resolve_workdir()
 {
    # resolve workdir
@@ -54,11 +74,17 @@ resolve_workdir()
       # try retrieving workdir value from parsed options array
       get_option_value w :workdir
 
+      # get rid of git bash's root conversion
+      declare bash_real_root="C:/Program Files/Git"
+
+      workdir="$( echo $workdir | sed  "s#${bash_real_root}##" )"
+
       # try retrieving workdir value from previous one saved in config data file
-      [[ -z "${workdir}" ]] && get_attr 'workdir' :workdir
+      [[ "${workdir}" == "-" ]] && get_attr 'workdir' :workdir
+
 
       # try retrieving workdir value from user prompt
-      if [[ -z "${workdir}" ]] || [[ "${workdir}" == "-" ]]
+      if [[ -z "${workdir}" ]]
       then
 
          echo "Enter a valid path: "
@@ -69,8 +95,19 @@ resolve_workdir()
 
             echo 'No path provided'
             echo 'Falling back to current user home directory.'
+
+            return 1
          fi
+
       fi
+
+      check_workdir :path_type
+
+      [[ "${path_type}" == "d" ]] && set_and_save_attr workdir $workdir
+
+      [[ -n "${1}" ]] && bind_param :path_type
+
+      return 0
    fi
 }
 
@@ -132,5 +169,6 @@ connect_to_vm()
 
 declare -xf ping_vm
 declare -xf connect_to_vm
+declare -xf check_workdir
 declare -xf resolve_workdir
 declare -xf retrieve_conn_params
