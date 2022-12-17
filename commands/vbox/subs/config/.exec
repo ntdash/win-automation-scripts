@@ -15,7 +15,9 @@ fi
 # set option
 declare option="${keys[0]}"
 
-echo $option | grep -Ei '^(list|get|update|create)$' > /dev/null
+declare -A allowed_options="([s]=set [g]=get [l]=list [i]=init)"
+
+[[ " ${!allowed_options[@]} " =~ " ${option} " ]] ||  [[ " ${allowed_options[@]} " =~ " ${option} " ]]
 
 # early exit when unxepected option given
 if [[ $? -ne 0 ]]
@@ -31,25 +33,25 @@ fi
 
 case $option in
 
-   create)
+   init|i)
 
       create_vm_config
    ;;
 
    *)
       case $option in
-         list)
+         list|l)
 
             list_attrs
          ;;
-         get)
+         get|g)
 
-            get_option_value get :param
+            get_option_value $option :param
             get_attr $param
          ;;
-         update)
+         set|s)
 
-            get_option_value update :params
+            get_option_value $option :params
 
             declare IFS='='
             declare -a attrs="("$(echo $params)")"
