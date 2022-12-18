@@ -142,15 +142,8 @@ ping_vm()
 
 connect_to_vm()
 {
-   retrieve_conn_params
-
-   # resolve workdir
-   resolve_workdir
 
    echo -e "Trying connecting through ssh with:\nHost: ${vm_host}\nUser: ${vm_user}\nWorkdir: ${workdir:-"~"}\n..."
-
-   # try reaching host
-   ping_vm
 
    # retrieve vm shell
    get_attr 'shell' :vm_shell

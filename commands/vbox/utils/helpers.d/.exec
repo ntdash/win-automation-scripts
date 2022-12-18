@@ -1,44 +1,26 @@
 x_open()
 {
-   # ping vm
    ping_vm
 
    resolve_workdir
 
-
-
-   declare rhome="$(ssh -l ${vm_user} ${vm_host} 'cd ~ && pwd')"
-
-   # resolve slash prefix
-   [[ "${workdir}" =~ ^/ ]] || workdir="${rhome}/${workdir}"
-
-   # check pathname existence
-   ssh -ql $vm_user $vm_host "ls -1 ${workdir} 2> /dev/null" > /dev/null
-
-   [[ $? -ne 0 ]] && r_quit 1 "vbox: exec: cannot access '${workdir}'."
-
    code --remote ssh-remote+"${vm_user}.${vm_host}" "${workdir}"
 
-   [[ $? -ne 0 ]] && r_quit 1 "code: Failed to open workdir \"${workdir}\" in [\"${vname}\"]."
-
-   # update change
-   set_attr 'workdir' ${workdir}
-
-   # persit change
-   save_vm_config
 }
 
 x_login()
 {
+   ping_vm
+
+   resolve_workdir
+
    connect_to_vm
 }
 
 x_command()
 {
-   # ping vname network
    ping_vm
 
-   # retrive option value
    get_option_value c :serialized_cmd
 
    [[ -z "${serialized_cmd}" ]] && r_quit 1 'vbox: exec: no command provided'
