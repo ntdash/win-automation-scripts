@@ -57,7 +57,7 @@ check_workdir()
 
    path_type="$(ssh -ql $vm_user $vm_host $ssh_command |  awk -F '' '{print $1}')"
 
-   [[ $? -ne 0 ]] && r_quit 1 "vbox: exec: cannot access '${workdir}'."
+   [[ -z "${path_type}" ]] && r_quit 1 "vbox: exec: cannot access '${workdir}'."
 
    bind_param path_type $1
 }
